@@ -20,7 +20,7 @@ public class Handler {
 
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
         return request.bodyToMono(UserRegisterReq.class)
-                .map(mapper::ToModel)
+                .map(mapper::toModel)
                 .flatMap(useCase::createUser)
                 .map(mapper::toResponse)
                 .flatMap(userRes -> ServerResponse.status(HttpStatus.CREATED)
