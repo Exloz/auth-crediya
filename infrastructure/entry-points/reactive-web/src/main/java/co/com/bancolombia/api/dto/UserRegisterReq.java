@@ -3,7 +3,7 @@ package co.com.bancolombia.api.dto;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 public record UserRegisterReq(
         @NotBlank(message = ValidationMessages.NAME_REQUIRED)
@@ -13,9 +13,10 @@ public record UserRegisterReq(
         String lastName,
 
         @NotNull(message = ValidationMessages.BIRTH_DATE_REQUIRED)
-        Date birthDate,
+        LocalDate birthDate,
 
         String address,
+        String idDocument,
 
         @NotBlank(message = ValidationMessages.EMAIL_REQUIRED)
         @Email(message = ValidationMessages.EMAIL_INVALID_FORMAT)

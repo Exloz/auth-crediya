@@ -1,12 +1,13 @@
 package co.com.bancolombia.r2dbc.entity;
 
+import co.com.bancolombia.model.user.RoleId;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Table("users")
 @NoArgsConstructor
@@ -17,13 +18,13 @@ import java.util.Date;
 public class UserEntity {
     @Id
     @Column("user_id")
-    private String userId;
+    private Long userId;
 
     @Column("name")
     private String name;
 
-    @Column("lastname")
-    private String lastname;
+    @Column("lastName")
+    private String lastName;
 
     @Column("email")
     private String email;
@@ -38,10 +39,10 @@ public class UserEntity {
     private String address;
 
     @Column("birth_date")
-    private Date birthDate;
+    private LocalDate birthDate;
 
     @Column("role_id")
-    private String roleId;
+    private RoleId roleId;
 
     @Column("base_salary")
     private BigDecimal baseSalary;
