@@ -22,7 +22,7 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<User,
     public Mono<User> saveUser(User user) {
         return super.save(user)
                 .onErrorResume(DataIntegrityViolationException.class, ex ->
-                        Mono.error(new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists")));
+                        Mono.error(new UserAlreadyExistsException("User with document number" + user.getIdDocument() + " already exists")));
     }
 
     @Override
