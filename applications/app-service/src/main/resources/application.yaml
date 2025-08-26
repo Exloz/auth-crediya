@@ -2,7 +2,7 @@ server:
   port: 8080
 spring:
   application:
-    name: "ScaffoldQuickStart"
+    name: "auth-crediya"
   devtools:
     add-properties: false
   profiles:

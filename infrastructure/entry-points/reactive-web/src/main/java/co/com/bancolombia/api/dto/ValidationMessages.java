@@ -2,6 +2,10 @@ package co.com.bancolombia.api.dto;
 
 public final class ValidationMessages {
 
+    private ValidationMessages() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static final String NAME_REQUIRED = "Name is required and cannot be blank";
     public static final String LASTNAME_REQUIRED = "Lastname is required and cannot be blank";
     public static final String EMAIL_REQUIRED = "Email is required and cannot be blank";

@@ -10,7 +10,7 @@ public record UserRegisterReq(
         String name,
 
         @NotBlank(message = ValidationMessages.LASTNAME_REQUIRED)
-        String lastname,
+        String lastName,
 
         @NotNull(message = ValidationMessages.BIRTH_DATE_REQUIRED)
         Date birthDate,
