@@ -12,13 +12,14 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class User {
-  private String userId;
-  private String name;
-  private String lastname;
-  private String email;
-  private String idDocument;
-  private String phoneNumber;
-  private String address;
-  private Date birthDate;
-  private BigDecimal baseSalary;
+    private String userId;
+    private String name;
+    private String lastname;
+    private String email;
+    private String idDocument;
+    private String phoneNumber;
+    private String address;
+    private Date birthDate;
+    private String roleId;
+    private BigDecimal baseSalary;
 }
