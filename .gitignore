@@ -336,3 +336,4 @@ gradle-app.setting
 build-cache
 .vscode/settings.json
 /AGENTS.md
+/.env
