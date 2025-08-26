@@ -1,16 +1,20 @@
-package co.com.bancolombia.model.user;
+package co.com.bancolombia.r2dbc.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Getter
-@Setter
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
-public class User {
+@Getter
+@Setter
+@Builder
+public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String userId;
     private String name;
     private String lastname;
