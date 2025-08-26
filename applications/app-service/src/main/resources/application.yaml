@@ -7,6 +7,8 @@ spring:
     add-properties: false
   profiles:
     include: null
+  r2dbc:
+    initialization-mode: always
 management:
   endpoints:
     web:
@@ -17,7 +19,7 @@ management:
       probes:
         enabled: true
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "*"
 
 # PostgreSQL Configuration
 adapters:
