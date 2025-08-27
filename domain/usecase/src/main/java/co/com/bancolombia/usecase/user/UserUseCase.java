@@ -13,7 +13,7 @@ public class UserUseCase implements UserUseCasePort {
 
     public Mono<User> createUser(User user) {
         checkEmailRole(user);
-        return userRepository.getByEmail(user)
+        return userRepository.validateEmailNotExists(user)
                 .then(userRepository.saveUser(user));
     }
 

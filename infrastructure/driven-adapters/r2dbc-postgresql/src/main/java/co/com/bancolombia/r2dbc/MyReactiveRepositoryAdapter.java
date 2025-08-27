@@ -32,8 +32,8 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<User,
     }
 
     @Override
-    public Mono<Void> getByEmail(User user) {
-        log.debug("Checking if email exists in database: {}", user.getEmail());
+    public Mono<Void> validateEmailNotExists(User user) {
+        log.debug("Validating email does not exist in database: {}", user.getEmail());
 
         return repository.findByEmail(user.getEmail())
                 .doOnNext(entity -> log.warn("Email already exists in database: {}", user.getEmail()))
