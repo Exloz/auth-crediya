@@ -37,4 +37,5 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+    url: /api-docs
     enabled: true
