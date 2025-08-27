@@ -29,13 +29,6 @@ public class Handler {
     private final UserMapper mapper;
     private final Validator validator;
 
-    @Operation(summary = "Registrar usuario", description = "Registra un nuevo usuario en el sistema")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
-        @ApiResponse(responseCode = "409", description = "El email ya está registrado"),
-        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
         log.info("Create user request received");
         return request.bodyToMono(UserRegisterReq.class)
