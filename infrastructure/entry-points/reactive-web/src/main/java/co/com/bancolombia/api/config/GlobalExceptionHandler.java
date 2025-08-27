@@ -15,7 +15,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -34,14 +33,17 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             return Mono.error(ex);
         }
 
+        String path = exchange.getRequest().getPath().value();
         HttpStatus status = determineHttpStatus(ex);
+        log.error("Error on request {}: {}", path, ex.getMessage());
+
         ProblemDetail problem = toProblemDetail(ex, status, exchange);
 
         byte[] body;
         try {
             body = objectMapper.writeValueAsBytes(problem);
         } catch (Exception e) {
-            log.error("Error serializing ProblemDetail", e);
+            log.error("Error serialization: {}", e.getMessage());
             exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
             exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
             byte[] fallback = "{\"status\":500,\"error\":\"Internal Server Error\",\"message\":\"Serialization error\"}".getBytes();
@@ -54,12 +56,15 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
     }
 
     private HttpStatus determineHttpStatus(Throwable ex) {
-        return switch (ex) {
+        HttpStatus status = switch (ex) {
             case UserAlreadyExistsException ignored -> HttpStatus.CONFLICT;
             case ConstraintViolationException ignored -> HttpStatus.BAD_REQUEST;
             case IllegalArgumentException ignored -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
+
+        log.debug("Exception {} mapped to HTTP status: {}", ex.getClass().getSimpleName(), status.value());
+        return status;
     }
 
     private ProblemDetail toProblemDetail(Throwable ex, HttpStatus status, ServerWebExchange exchange) {

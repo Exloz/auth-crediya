@@ -27,6 +27,7 @@ public class Handler {
     private final Validator validator;
 
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
+        log.info("Create user request received");
         return request.bodyToMono(UserRegisterReq.class)
                 .doOnNext(this::validateRequest)
                 .map(mapper::toModel)
@@ -34,14 +35,16 @@ public class Handler {
                 .map(mapper::toResponse)
                 .flatMap(userRes -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(userRes));
+                        .bodyValue(userRes))
+                .doOnError(error -> log.error("Error creating User: {}", error.getMessage()));
     }
 
     private void validateRequest(UserRegisterReq request) {
         Set<ConstraintViolation<UserRegisterReq>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
-            log.warn("Validation failed for request: {}", violations.size());
+            log.warn("Validation failed: {}", violations.size());
             throw new ConstraintViolationException(violations);
         }
+        
     }
 }
