@@ -12,8 +12,8 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
             .info(new Info()
-                .title("Registro de Usuarios API")
+                .title("User Registration API")
                 .version("1.0")
-                .description("API para registro de usuarios"));
+                .description("API for user registration"));
     }
 }

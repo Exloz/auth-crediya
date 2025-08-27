@@ -26,19 +26,19 @@ public class RouterRest {
             @RouterOperation( path = "/api/v1/usuarios",
                     produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenCreateUser",
                     operation = @Operation( operationId = "createUser",
-                            summary = "Registrar usuario",
-                            description = "Registra un nuevo usuario en el sistema",
+                            summary = "Register user",
+                            description = "Registers a new user in the system",
                             requestBody = @RequestBody(
-                                description = "Datos del usuario a registrar",
+                                description = "Data of the user to register",
                                 required = true,
                                 content = @Content(schema = @Schema(implementation = UserRegisterReq.class))
                             ),
                             responses = {
-                                @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente",
+                                @ApiResponse(responseCode = "201", description = "User created successfully",
                                     content = @Content(schema = @Schema(implementation = UserRegisterRes.class))),
-                                @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
-                                @ApiResponse(responseCode = "409", description = "El email ya está registrado"),
-                                @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                                @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                                @ApiResponse(responseCode = "409", description = "The email is already registered"),
+                                @ApiResponse(responseCode = "500", description = "Internal server error")
                             })
             )})
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
