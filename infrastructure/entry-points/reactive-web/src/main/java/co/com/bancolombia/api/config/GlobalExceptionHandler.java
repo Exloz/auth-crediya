@@ -11,11 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import reactor.core.publisher.Mono;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,15 +59,13 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
     }
 
     private HttpStatus determineHttpStatus(Throwable ex) {
-        HttpStatus status = switch (ex) {
+        return switch (ex) {
             case UserAlreadyExistsException ignored -> HttpStatus.CONFLICT;
             case ConstraintViolationException ignored -> HttpStatus.BAD_REQUEST;
             case IllegalArgumentException ignored -> HttpStatus.BAD_REQUEST;
+            case WebExchangeBindException ignored -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
-
-        log.debug("Exception {} mapped to HTTP status: {}", ex.getClass().getSimpleName(), status.value());
-        return status;
     }
 
     private ProblemDetail toProblemDetail(Throwable ex, HttpStatus status, ServerWebExchange exchange) {
@@ -77,7 +78,15 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         pd.setProperty("timestamp", OffsetDateTime.now().toString());
         pd.setProperty("traceId", exchange.getRequest().getId());
 
-        if (ex instanceof ConstraintViolationException cve) {
+        if (ex instanceof WebExchangeBindException webExchangeBindException) {
+            List<Map<String, String>> violations = webExchangeBindException.getFieldErrors().stream()
+                    .map(error -> Map.of(
+                            "field", error.getField(),
+                            "message", error.getDefaultMessage()
+                    ))
+                    .toList();
+            pd.setProperty("violations", violations);
+        } else if (ex instanceof ConstraintViolationException cve) {
             List<Map<String, String>> violations = cve.getConstraintViolations().stream()
                     .map(v -> Map.of(
                             "field", v.getPropertyPath().toString(),
@@ -94,8 +103,69 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         return switch (ex) {
             case UserAlreadyExistsException e -> e.getMessage();
             case ConstraintViolationException e -> "Validation failed";
-            case IllegalArgumentException e -> "Invalid request data: " + e.getMessage();
+            case IllegalArgumentException e -> e.getMessage();
+            case WebExchangeBindException e -> "Validation failed";
             default -> "An unexpected error occurred. Please try again later.";
         };
+    }
+
+    public static Mono<ServerResponse> handleException(Throwable throwable) {
+        return switch (throwable) {
+            case UserAlreadyExistsException ignored -> handleConflict(throwable.getMessage());
+            case ConstraintViolationException ignored -> handleBadRequest(throwable.getMessage());
+            case IllegalArgumentException ignored -> handleBadRequest(throwable.getMessage());
+            case WebExchangeBindException webExchangeBindException ->
+                    handleValidationException(webExchangeBindException);
+            default -> handleInternalServerError(throwable.getMessage());
+        };
+    }
+
+    private static Mono<ServerResponse> handleBadRequest(String message) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Bad Request");
+        error.put("message", message);
+        error.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return ServerResponse.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
+    }
+
+    private static Mono<ServerResponse> handleValidationException(WebExchangeBindException ex) {
+        Map<String, Object> errors = new HashMap<>();
+        errors.put("error", "Validation Error");
+        errors.put("status", HttpStatus.BAD_REQUEST.value());
+
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getFieldErrors().forEach(error ->
+            fieldErrors.put(error.getField(), error.getDefaultMessage()));
+
+        errors.put("fieldErrors", fieldErrors);
+
+        return ServerResponse.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(errors);
+    }
+
+    private static Mono<ServerResponse> handleConflict(String message) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Conflict");
+        error.put("message", message);
+        error.put("status", HttpStatus.CONFLICT.value());
+
+        return ServerResponse.status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
+    }
+
+    private static Mono<ServerResponse> handleInternalServerError(String message) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Internal Server Error");
+        error.put("message", "An unexpected error occurred");
+        error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
     }
 }

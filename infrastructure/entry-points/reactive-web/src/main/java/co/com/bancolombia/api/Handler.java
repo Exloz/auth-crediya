@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,24 +29,34 @@ public class Handler {
     private final Validator validator;
 
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
-        log.info("Create user request received");
         return request.bodyToMono(UserRegisterReq.class)
-                .doOnNext(this::validateRequest)
+                .doOnNext(req -> log.info("Received user registration request: {}", req))
+                .flatMap(this::validateRequest)
                 .map(mapper::toModel)
                 .flatMap(useCase::createUser)
                 .map(mapper::toResponse)
                 .flatMap(userRes -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(userRes))
-                .doOnError(error -> log.error("Error creating User: {}", error.getMessage()));
+                .doOnSuccess(response -> log.info("User registered successfully"))
+                .doOnError(error -> log.error("Error registering user: {}", getOriginOfError(error)));
     }
 
-    private void validateRequest(UserRegisterReq request) {
+    private Mono<UserRegisterReq> validateRequest(UserRegisterReq request) {
         Set<ConstraintViolation<UserRegisterReq>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
-            log.warn("Validation failed: {}", violations.size());
-            throw new ConstraintViolationException(violations);
+            StringBuilder message = new StringBuilder("Validation errors: ");
+            violations.forEach(violation -> message.append(violation.getMessage()).append("; "));
+            return Mono.error(new IllegalArgumentException(message.toString()));
         }
-        
+        return Mono.just(request);
+    }
+
+    private String getOriginOfError(Throwable error) {
+        if (error.getStackTrace().length > 0) {
+            var origin = error.getStackTrace()[0];
+            return origin.getClassName() + "." + origin.getMethodName() + " (line " + origin.getLineNumber() + ")";
+        }
+        return "Unknown origin";
     }
 }
