@@ -8,15 +8,15 @@ import java.time.LocalDate;
 
 @Schema(description = "Datos para registrar un nuevo usuario")
 public record UserRegisterReq(
-        @Schema(description = "Nombre del usuario", example = "Juan", required = true)
+        @Schema(description = "Nombre del usuario", example = "Juan")
         @NotBlank(message = ValidationMessages.NAME_REQUIRED)
         String name,
 
-        @Schema(description = "Apellido del usuario", example = "Pérez", required = true)
+        @Schema(description = "Apellido del usuario", example = "Pérez")
         @NotBlank(message = ValidationMessages.LASTNAME_REQUIRED)
         String lastName,
 
-        @Schema(description = "Fecha de nacimiento", example = "1990-01-15", required = true)
+        @Schema(description = "Fecha de nacimiento", example = "1990-01-15")
         @NotNull(message = ValidationMessages.BIRTH_DATE_REQUIRED)
         LocalDate birthDate,
 
@@ -26,15 +26,15 @@ public record UserRegisterReq(
         @Schema(description = "Número de documento de identidad", example = "12345678")
         String idDocument,
 
-        @Schema(description = "Correo electrónico", example = "juan.perez@email.com", required = true)
+        @Schema(description = "Correo electrónico", example = "juan.perez@email.com")
         @NotBlank(message = ValidationMessages.EMAIL_REQUIRED)
         @Email(message = ValidationMessages.EMAIL_INVALID_FORMAT)
         String email,
 
-        @Schema(description = "Salario base mensual", example = "2500000.00", required = true)
+        @Schema(description = "Salario base mensual", example = "2500000.00")
         @NotNull(message = ValidationMessages.BASE_SALARY_REQUIRED)
         @DecimalMin(value = "0.0", inclusive = false, message = ValidationMessages.BASE_SALARY_MIN_VALUE)
-        @DecimalMax(value = "15000000.0", inclusive = true, message = ValidationMessages.BASE_SALARY_MAX_VALUE)
+        @DecimalMax(value = "15000000.0", message = ValidationMessages.BASE_SALARY_MAX_VALUE)
         BigDecimal baseSalary,
 
         @Schema(description = "Número de teléfono", example = "+57 300 123 4567")
