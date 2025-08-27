@@ -1,37 +1,39 @@
 package co.com.bancolombia.r2dbc.config;
 
-import org.junit.jupiter.api.BeforeEach;
+import io.r2dbc.postgresql.PostgresqlConnectionFactory;
+import io.r2dbc.postgresql.PostgresqlConnectionConfiguration;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PostgreSQLConnectionPoolTest {
 
-    @InjectMocks
-    private PostgreSQLConnectionPool connectionPool;
-
-    @Mock
-    private PostgresqlConnectionProperties properties;
-
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        when(properties.host()).thenReturn("localhost");
-        when(properties.port()).thenReturn(5432);
-        when(properties.database()).thenReturn("dbName");
-        when(properties.schema()).thenReturn("schema");
-        when(properties.username()).thenReturn("username");
-        when(properties.password()).thenReturn("password");
-    }
+    private final PostgreSQLConnectionPool connectionPool = new PostgreSQLConnectionPool();
 
     @Test
     void getConnectionConfigSuccess() {
-        assertNotNull(connectionPool.getConnectionConfig(properties));
+        // Create a real PostgresqlConnectionFactory for testing
+        PostgresqlConnectionConfiguration config = PostgresqlConnectionConfiguration.builder()
+            .host("localhost")
+            .port(PostgreSQLConnectionPool.DEFAULT_PORT)
+            .database("test")
+            .username("test")
+            .password("test")
+            .build();
+
+        PostgresqlConnectionFactory connectionFactory = new PostgresqlConnectionFactory(config);
+
+        // Test that the method doesn't throw an exception and returns a ConnectionPool
+        assertNotNull(connectionPool.getConnectionConfig(connectionFactory));
+    }
+
+    @Test
+    void testConnectionPoolConstants() {
+        // Test that the constants are properly defined
+        assertEquals(12, PostgreSQLConnectionPool.INITIAL_SIZE);
+        assertEquals(15, PostgreSQLConnectionPool.MAX_SIZE);
+        assertEquals(30, PostgreSQLConnectionPool.MAX_IDLE_TIME);
+        assertEquals(5432, PostgreSQLConnectionPool.DEFAULT_PORT);
     }
 }
