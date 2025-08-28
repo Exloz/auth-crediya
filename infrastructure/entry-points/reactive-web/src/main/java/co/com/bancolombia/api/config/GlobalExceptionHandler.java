@@ -28,6 +28,31 @@ import java.util.Map;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler implements WebExceptionHandler {
 
+    // Log messages
+    private static final String ERROR_ON_REQUEST_LOG = "Error on request {}: {}";
+    private static final String ERROR_SERIALIZATION_LOG = "Error serialization: {}";
+
+    // Error messages
+    private static final String VALIDATION_FAILED = "Validation failed";
+    private static final String UNEXPECTED_ERROR_MESSAGE = "An unexpected error occurred. Please try again later.";
+    private static final String SERIALIZATION_ERROR_MESSAGE = "Serialization error";
+    private static final String UNEXPECTED_ERROR_SHORT = "An unexpected error occurred";
+
+    // Error response fields
+    private static final String ERROR_FIELD = "error";
+    private static final String MESSAGE_FIELD = "message";
+    private static final String STATUS_FIELD = "status";
+    private static final String FIELD_ERRORS_FIELD = "fieldErrors";
+
+    // Error types
+    private static final String BAD_REQUEST_ERROR = "Bad Request";
+    private static final String VALIDATION_ERROR = "Validation Error";
+    private static final String CONFLICT_ERROR = "Conflict";
+    private static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
+
+    // Content types
+    private static final String PROBLEM_JSON_CONTENT_TYPE = "application/problem+json";
+
     private final ObjectMapper objectMapper;
 
     @Override
@@ -38,7 +63,7 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
 
         String path = exchange.getRequest().getPath().value();
         HttpStatus status = determineHttpStatus(ex);
-        log.error("Error on request {}: {}", path, ex.getMessage());
+        log.error(ERROR_ON_REQUEST_LOG, path, ex.getMessage());
 
         ProblemDetail problem = toProblemDetail(ex, status, exchange);
 
@@ -46,15 +71,15 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         try {
             body = objectMapper.writeValueAsBytes(problem);
         } catch (Exception e) {
-            log.error("Error serialization: {}", e.getMessage());
+            log.error(ERROR_SERIALIZATION_LOG, e.getMessage());
             exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
             exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            byte[] fallback = "{\"status\":500,\"error\":\"Internal Server Error\",\"message\":\"Serialization error\"}".getBytes();
+            byte[] fallback = ("{\"" + STATUS_FIELD + "\":500,\"" + ERROR_FIELD + "\":\"" + INTERNAL_SERVER_ERROR + "\",\"" + MESSAGE_FIELD + "\":\"" + SERIALIZATION_ERROR_MESSAGE + "\"}").getBytes();
             return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(fallback)));
         }
 
         exchange.getResponse().setStatusCode(status);
-        exchange.getResponse().getHeaders().setContentType(MediaType.parseMediaType("application/problem+json"));
+        exchange.getResponse().getHeaders().setContentType(MediaType.parseMediaType(PROBLEM_JSON_CONTENT_TYPE));
         return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(body)));
     }
 
@@ -102,10 +127,10 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
     private String determineErrorMessage(Throwable ex) {
         return switch (ex) {
             case UserAlreadyExistsException e -> e.getMessage();
-            case ConstraintViolationException e -> "Validation failed";
+            case ConstraintViolationException e -> VALIDATION_FAILED;
             case IllegalArgumentException e -> e.getMessage();
-            case WebExchangeBindException e -> "Validation failed";
-            default -> "An unexpected error occurred. Please try again later.";
+            case WebExchangeBindException e -> VALIDATION_FAILED;
+            default -> UNEXPECTED_ERROR_MESSAGE;
         };
     }
 
@@ -122,9 +147,9 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
 
     private static Mono<ServerResponse> handleBadRequest(String message) {
         Map<String, Object> error = new HashMap<>();
-        error.put("error", "Bad Request");
-        error.put("message", message);
-        error.put("status", HttpStatus.BAD_REQUEST.value());
+        error.put(ERROR_FIELD, BAD_REQUEST_ERROR);
+        error.put(MESSAGE_FIELD, message);
+        error.put(STATUS_FIELD, HttpStatus.BAD_REQUEST.value());
 
         return ServerResponse.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -133,14 +158,14 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
 
     private static Mono<ServerResponse> handleValidationException(WebExchangeBindException ex) {
         Map<String, Object> errors = new HashMap<>();
-        errors.put("error", "Validation Error");
-        errors.put("status", HttpStatus.BAD_REQUEST.value());
+        errors.put(ERROR_FIELD, VALIDATION_ERROR);
+        errors.put(STATUS_FIELD, HttpStatus.BAD_REQUEST.value());
 
         Map<String, String> fieldErrors = new HashMap<>();
         ex.getFieldErrors().forEach(error ->
             fieldErrors.put(error.getField(), error.getDefaultMessage()));
 
-        errors.put("fieldErrors", fieldErrors);
+        errors.put(FIELD_ERRORS_FIELD, fieldErrors);
 
         return ServerResponse.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,9 +174,9 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
 
     private static Mono<ServerResponse> handleConflict(String message) {
         Map<String, Object> error = new HashMap<>();
-        error.put("error", "Conflict");
-        error.put("message", message);
-        error.put("status", HttpStatus.CONFLICT.value());
+        error.put(ERROR_FIELD, CONFLICT_ERROR);
+        error.put(MESSAGE_FIELD, message);
+        error.put(STATUS_FIELD, HttpStatus.CONFLICT.value());
 
         return ServerResponse.status(HttpStatus.CONFLICT)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -160,9 +185,9 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
 
     private static Mono<ServerResponse> handleInternalServerError(String message) {
         Map<String, Object> error = new HashMap<>();
-        error.put("error", "Internal Server Error");
-        error.put("message", "An unexpected error occurred");
-        error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        error.put(ERROR_FIELD, INTERNAL_SERVER_ERROR);
+        error.put(MESSAGE_FIELD, UNEXPECTED_ERROR_SHORT);
+        error.put(STATUS_FIELD, HttpStatus.INTERNAL_SERVER_ERROR.value());
 
         return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)

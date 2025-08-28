@@ -3,9 +3,6 @@ package co.com.bancolombia.api;
 import co.com.bancolombia.api.dto.UserRegisterReq;
 import co.com.bancolombia.api.mapper.UserMapper;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +21,23 @@ import java.util.Set;
 @Slf4j
 public class Handler {
 
+    // Log messages
+    private static final String RECEIVED_USER_REGISTRATION_REQUEST = "Received user registration request: {}";
+    private static final String USER_REGISTERED_SUCCESSFULLY = "User registered successfully";
+    private static final String ERROR_REGISTERING_USER = "Error registering user: {}";
+
+    // Validation messages
+    private static final String VALIDATION_ERRORS_PREFIX = "Validation errors: ";
+    private static final String VALIDATION_ERROR_SEPARATOR = "; ";
+    private static final String UNKNOWN_ORIGIN = "Unknown origin";
+
     private final UserUseCasePort useCase;
     private final UserMapper mapper;
     private final Validator validator;
 
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
         return request.bodyToMono(UserRegisterReq.class)
-                .doOnNext(req -> log.info("Received user registration request: {}", req))
+                .doOnNext(req -> log.info(RECEIVED_USER_REGISTRATION_REQUEST, req))
                 .flatMap(this::validateRequest)
                 .map(mapper::toModel)
                 .flatMap(useCase::createUser)
@@ -38,15 +45,15 @@ public class Handler {
                 .flatMap(userRes -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(userRes))
-                .doOnSuccess(response -> log.info("User registered successfully"))
-                .doOnError(error -> log.error("Error registering user: {}", getOriginOfError(error)));
+                .doOnSuccess(response -> log.info(USER_REGISTERED_SUCCESSFULLY))
+                .doOnError(error -> log.error(ERROR_REGISTERING_USER, getOriginOfError(error)));
     }
 
     private Mono<UserRegisterReq> validateRequest(UserRegisterReq request) {
         Set<ConstraintViolation<UserRegisterReq>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
-            StringBuilder message = new StringBuilder("Validation errors: ");
-            violations.forEach(violation -> message.append(violation.getMessage()).append("; "));
+            StringBuilder message = new StringBuilder(VALIDATION_ERRORS_PREFIX);
+            violations.forEach(violation -> message.append(violation.getMessage()).append(VALIDATION_ERROR_SEPARATOR));
             return Mono.error(new IllegalArgumentException(message.toString()));
         }
         return Mono.just(request);
@@ -57,6 +64,6 @@ public class Handler {
             var origin = error.getStackTrace()[0];
             return origin.getClassName() + "." + origin.getMethodName() + " (line " + origin.getLineNumber() + ")";
         }
-        return "Unknown origin";
+        return UNKNOWN_ORIGIN;
     }
 }
