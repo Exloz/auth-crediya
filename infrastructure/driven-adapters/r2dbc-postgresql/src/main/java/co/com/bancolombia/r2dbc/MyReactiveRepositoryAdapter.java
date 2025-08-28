@@ -38,13 +38,15 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<User,
 
     @Override
     public Mono<User> saveUser(User user) {
-        return transactionalOperator.execute(tx -> super.save(user)
-                .onErrorResume(DataIntegrityViolationException.class, ex -> {
-                    log.error(USER_ALREADY_EXISTS_LOG, user.getName(), user.getIdDocument());
-                    return Mono.error(new UserAlreadyExistsException(USER_WITH_DOCUMENT_EXISTS + user.getIdDocument() + ALREADY_EXISTS_SUFFIX));
-                }))
-                .next();
+        return super.save(user)
+                .onErrorMap(DataIntegrityViolationException.class, ex ->
+                        new UserAlreadyExistsException(
+                                USER_WITH_DOCUMENT_EXISTS + " " + user.getIdDocument() + ALREADY_EXISTS_SUFFIX
+                        )
+                )
+                .as(transactionalOperator::transactional);
     }
+
 
     @Override
     public Mono<Void> validateEmailNotExists(User user) {
