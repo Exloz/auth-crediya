@@ -9,8 +9,11 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class MainApplication {
+
+    private static final String APPLICATION_STARTED_SUCCESSFULLY = "Auth Crediya Application started successfully";
+
     public static void main(String[] args) {
         SpringApplication.run(MainApplication.class, args);
-        log.info("Auth Crediya Application started successfully");
+        log.info(APPLICATION_STARTED_SUCCESSFULLY);
     }
 }

@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.r2dbc.connection.R2dbcTransactionManager;
+import org.springframework.transaction.ReactiveTransactionManager;
 
 import java.time.Duration;
 
@@ -33,17 +35,22 @@ public class PostgreSQLConnectionPool {
  		return new R2dbcEntityTemplate(connectionFactory);
  	}
 
- 	@Bean
- 	public ConnectionPool getConnectionConfig(io.r2dbc.spi.ConnectionFactory connectionFactory) {
-         ConnectionPoolConfiguration poolConfiguration = ConnectionPoolConfiguration.builder()
-                 .connectionFactory(connectionFactory)
-                 .name("api-postgres-connection-pool")
-                 .initialSize(INITIAL_SIZE)
-                 .maxSize(MAX_SIZE)
-                 .maxIdleTime(Duration.ofMinutes(MAX_IDLE_TIME))
-                 .validationQuery("SELECT 1")
-                 .build();
+  	@Bean
+  	public ConnectionPool getConnectionConfig(io.r2dbc.spi.ConnectionFactory connectionFactory) {
+          ConnectionPoolConfiguration poolConfiguration = ConnectionPoolConfiguration.builder()
+                  .connectionFactory(connectionFactory)
+                  .name("api-postgres-connection-pool")
+                  .initialSize(INITIAL_SIZE)
+                  .maxSize(MAX_SIZE)
+                  .maxIdleTime(Duration.ofMinutes(MAX_IDLE_TIME))
+                  .validationQuery("SELECT 1")
+                  .build();
 
- 		return new ConnectionPool(poolConfiguration);
- 	}
+  		return new ConnectionPool(poolConfiguration);
+  	}
+
+  	@Bean
+  	public ReactiveTransactionManager transactionManager(io.r2dbc.spi.ConnectionFactory connectionFactory) {
+  		return new R2dbcTransactionManager(connectionFactory);
+  	}
 }

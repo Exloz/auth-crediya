@@ -6,7 +6,6 @@ import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
 import co.com.bancolombia.api.mapper.UserMapper;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,20 +106,21 @@ class HandlerTest {
         // Given
         ServerRequest request = mock(ServerRequest.class);
         ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        when(violation.getMessage()).thenReturn("Email is required");
         @SuppressWarnings("unchecked")
         Set<ConstraintViolation<UserRegisterReq>> violations = (Set<ConstraintViolation<UserRegisterReq>>) (Set<?>) Set.of(violation);
 
         when(request.bodyToMono(UserRegisterReq.class))
-            .thenReturn(Mono.just(validUserRequest));
+                .thenReturn(Mono.just(validUserRequest));
         when(validator.validate(validUserRequest))
-            .thenReturn(violations);
+                .thenReturn(violations);
 
         // When
         Mono<ServerResponse> responseMono = handler.listenCreateUser(request);
 
         // Then
         StepVerifier.create(responseMono)
-            .expectError(ConstraintViolationException.class)
+            .expectError(IllegalArgumentException.class)
             .verify();
     }
 
@@ -157,7 +157,7 @@ class HandlerTest {
         // by ensuring no exception is thrown in the main flow
 
         // Then
-        // If validation passes, no ConstraintViolationException should be thrown
+        // If validation passes, no IllegalArgumentException should be thrown
         // This is tested implicitly in the successful creation test
     }
 
@@ -165,7 +165,7 @@ class HandlerTest {
     void shouldValidateRequestWithInvalidData() {
         // Given
         // When & Then
-        // The private validateRequest method should throw ConstraintViolationException
+        // The private validateRequest method should throw IllegalArgumentException
         // This is tested in the validation error test above
     }
 }
