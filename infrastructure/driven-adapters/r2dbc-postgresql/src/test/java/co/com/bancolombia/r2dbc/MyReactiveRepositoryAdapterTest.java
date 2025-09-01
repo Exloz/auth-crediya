@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.ReactiveTransactionManager;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +33,9 @@ class MyReactiveRepositoryAdapterTest {
 
     @Mock
     ObjectMapper mapper;
+
+    @Mock
+    ReactiveTransactionManager transactionManager;
 
     private User validUser;
     private UserEntity userEntity;
@@ -67,9 +72,9 @@ class MyReactiveRepositoryAdapterTest {
         User savedUser = validUser.toBuilder().userId(1L).build();
         when(repository.save(any(UserEntity.class)))
             .thenReturn(Mono.just(userEntity));
-        when(mapper.map(any(User.class), any()))
+        when(mapper.map(any(User.class), eq(UserEntity.class)))
             .thenReturn(userEntity);
-        when(mapper.map(any(UserEntity.class), any()))
+        when(mapper.map(any(UserEntity.class), eq(User.class)))
             .thenReturn(savedUser);
 
         // When
@@ -93,7 +98,7 @@ class MyReactiveRepositoryAdapterTest {
 
         when(repository.save(any(UserEntity.class)))
             .thenReturn(Mono.error(integrityException));
-        when(mapper.map(any(User.class), any()))
+        when(mapper.map(any(User.class), eq(UserEntity.class)))
             .thenReturn(userEntity);
 
         // When
