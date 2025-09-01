@@ -1,6 +1,7 @@
 package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.UserRegisterReq;
+import co.com.bancolombia.api.dto.AdminUserRegisterReq;
 import co.com.bancolombia.api.dto.UserRegisterRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,10 +27,10 @@ public class RouterRest {
             @RouterOperation( path = "/api/v1/usuarios",
                     produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenCreateUser",
                     operation = @Operation( operationId = "createUser",
-                            summary = "Register user",
-                            description = "Registers a new user in the system",
+                            summary = "Register client user",
+                            description = "Registers a new client user (role USER) in the system",
                             requestBody = @RequestBody(
-                                description = "Data of the user to register",
+                                description = "Data of the client to register",
                                 required = true,
                                 content = @Content(schema = @Schema(implementation = UserRegisterReq.class))
                             ),
@@ -40,8 +41,27 @@ public class RouterRest {
                                 @ApiResponse(responseCode = "409", description = "The email is already registered"),
                                 @ApiResponse(responseCode = "500", description = "Internal server error")
                             })
+            ),
+            @RouterOperation( path = "/api/v1/admin/usuarios",
+                    produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenRegisterPrivilegedUser",
+                    operation = @Operation( operationId = "createPrivilegedUser",
+                            summary = "Register privileged user",
+                            description = "Registers a new privileged user (role ADMIN or ASESOR) in the system",
+                            requestBody = @RequestBody(
+                                description = "Data of the privileged user to register",
+                                required = true,
+                                content = @Content(schema = @Schema(implementation = AdminUserRegisterReq.class))
+                            ),
+                            responses = {
+                                @ApiResponse(responseCode = "201", description = "User created successfully",
+                                    content = @Content(schema = @Schema(implementation = UserRegisterRes.class))),
+                                @ApiResponse(responseCode = "400", description = "Invalid input data or role"),
+                                @ApiResponse(responseCode = "409", description = "The email is already registered"),
+                                @ApiResponse(responseCode = "500", description = "Internal server error")
+                            })
             )})
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST("/api/v1/usuarios"), handler::listenCreateUser);
+        return route(POST("/api/v1/usuarios"), handler::listenCreateUser)
+                .andRoute(POST("/api/v1/admin/usuarios"), handler::listenRegisterPrivilegedUser);
     }
 }
