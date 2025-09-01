@@ -17,7 +17,6 @@ public record UserRegisterReq(
         String lastName,
 
         @Schema(description = "Date of birth", example = "1990-01-15")
-        @NotNull(message = ValidationMessages.BIRTH_DATE_REQUIRED)
         LocalDate birthDate,
 
         @Schema(description = "Residential address", example = "Calle 123 #45-67")
@@ -32,12 +31,14 @@ public record UserRegisterReq(
         String email,
 
         @Schema(description = "Monthly base salary", example = "2500000.00")
-        @NotNull(message = ValidationMessages.BASE_SALARY_REQUIRED)
         @DecimalMin(value = "0.0", inclusive = false, message = ValidationMessages.BASE_SALARY_MIN_VALUE)
         @DecimalMax(value = "15000000.0", message = ValidationMessages.BASE_SALARY_MAX_VALUE)
         BigDecimal baseSalary,
 
         @Schema(description = "Phone number", example = "+57 300 123 4567")
-        String phoneNumber
+        String phoneNumber,
+
+        @Schema(description = "Role to assign (optional)", example = "USER", allowableValues = {"USER", "ADMIN", "ASESOR"})
+        String role
 ) {
 }

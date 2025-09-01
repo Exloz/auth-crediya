@@ -1,7 +1,7 @@
 package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.AdminUserRegisterReq;
+import co.com.bancolombia.api.dto.ValidationMessages;
 import co.com.bancolombia.api.mapper.UserMapper;
 import co.com.bancolombia.api.dto.LoginReq;
 import co.com.bancolombia.api.dto.LoginRes;
@@ -30,7 +30,6 @@ public class Handler {
     private static final String RECEIVED_USER_REGISTRATION_REQUEST = "Received user registration request: {}";
     private static final String USER_REGISTERED_SUCCESSFULLY = "User registered successfully";
     private static final String ERROR_REGISTERING_USER = "Error registering user: {}";
-    private static final String RECEIVED_PRIVILEGED_REGISTRATION_REQUEST = "Received privileged user registration request: {}";
     private static final String RECEIVED_LOGIN_REQUEST = "Received login request for: {}";
 
     // Validation messages
@@ -47,30 +46,14 @@ public class Handler {
         return request.bodyToMono(UserRegisterReq.class)
                 .doOnNext(req -> log.info(RECEIVED_USER_REGISTRATION_REQUEST, req))
                 .flatMap(this::validateRequest)
-                .map(mapper::toModel)
-                .flatMap(useCase::createUser)
-                .map(mapper::toResponse)
-                .flatMap(userRes -> ServerResponse.status(HttpStatus.CREATED)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(userRes))
-                .doOnSuccess(response -> log.info(USER_REGISTERED_SUCCESSFULLY))
-                .doOnError(error -> log.error(ERROR_REGISTERING_USER, getOriginOfError(error)));
-    }
-
-    public Mono<ServerResponse> listenRegisterPrivilegedUser(ServerRequest request) {
-        return request.bodyToMono(AdminUserRegisterReq.class)
-                .doOnNext(req -> log.info(RECEIVED_PRIVILEGED_REGISTRATION_REQUEST, req))
-                .flatMap(this::validateRequest)
                 .map(req -> {
-                    //TODO: Revisar que esto se pueda validar en otra parte
                     var user = mapper.toModel(req);
-                    var roleStr = req.role().toUpperCase();
-                    if ("ADMIN".equals(roleStr)) {
-                        user.setRoleId(RoleId.ADMIN);
-                    } else if ("ASESOR".equals(roleStr)) {
-                        user.setRoleId(RoleId.ASESOR);
-                    } else {
-                        throw new IllegalArgumentException("Invalid role: " + roleStr);
+                    String roleStr = req.role() == null || req.role().isBlank() ? "USER" : req.role().trim().toUpperCase();
+                    switch (roleStr) {
+                        case "USER" -> user.setRoleId(RoleId.USER);
+                        case "ADMIN" -> user.setRoleId(RoleId.ADMIN);
+                        case "ASESOR" -> user.setRoleId(RoleId.ASESOR);
+                        default -> throw new IllegalArgumentException("Invalid role: " + roleStr);
                     }
                     return user;
                 })
@@ -83,25 +66,41 @@ public class Handler {
                 .doOnError(error -> log.error(ERROR_REGISTERING_USER, getOriginOfError(error)));
     }
 
+
+    //TODO: Refactor to reduce complexity
     private Mono<UserRegisterReq> validateRequest(UserRegisterReq request) {
         Set<ConstraintViolation<UserRegisterReq>> violations = validator.validate(request);
+        StringBuilder message = new StringBuilder();
         if (!violations.isEmpty()) {
-            StringBuilder message = new StringBuilder(VALIDATION_ERRORS_PREFIX);
+            message.append(VALIDATION_ERRORS_PREFIX);
             violations.forEach(violation -> message.append(violation.getMessage()).append(VALIDATION_ERROR_SEPARATOR));
+        }
+
+        String roleStr = (request.role() == null || request.role().isBlank()) ? "USER" : request.role().trim().toUpperCase();
+        if (!("USER".equals(roleStr) || "ADMIN".equals(roleStr) || "ASESOR".equals(roleStr))) {
+            message.append("Invalid role: ").append(roleStr).append(VALIDATION_ERROR_SEPARATOR);
+        } else if ("USER".equals(roleStr)) {
+            if (request.birthDate() == null) {
+                message.append(ValidationMessages.BIRTH_DATE_REQUIRED).append(VALIDATION_ERROR_SEPARATOR);
+            }
+            if (request.baseSalary() == null) {
+                message.append(ValidationMessages.BASE_SALARY_REQUIRED).append(VALIDATION_ERROR_SEPARATOR);
+            }
+        } else {
+            if (request.idDocument() == null || request.idDocument().isBlank()) {
+                message.append(ValidationMessages.ID_DOCUMENT_REQUIRED).append(VALIDATION_ERROR_SEPARATOR);
+            }
+            if (request.phoneNumber() == null || request.phoneNumber().isBlank()) {
+                message.append(ValidationMessages.PHONE_REQUIRED).append(VALIDATION_ERROR_SEPARATOR);
+            }
+        }
+
+        if (message.length() > 0) {
             return Mono.error(new IllegalArgumentException(message.toString()));
         }
         return Mono.just(request);
     }
 
-    private Mono<AdminUserRegisterReq> validateRequest(AdminUserRegisterReq request) {
-        Set<ConstraintViolation<AdminUserRegisterReq>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            StringBuilder message = new StringBuilder(VALIDATION_ERRORS_PREFIX);
-            violations.forEach(violation -> message.append(violation.getMessage()).append(VALIDATION_ERROR_SEPARATOR));
-            return Mono.error(new IllegalArgumentException(message.toString()));
-        }
-        return Mono.just(request);
-    }
 
     private String getOriginOfError(Throwable error) {
         if (error.getStackTrace().length > 0) {

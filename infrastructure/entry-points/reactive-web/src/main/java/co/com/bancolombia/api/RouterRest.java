@@ -1,7 +1,6 @@
 package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.AdminUserRegisterReq;
 import co.com.bancolombia.api.dto.UserRegisterRes;
 import co.com.bancolombia.api.dto.LoginReq;
 import co.com.bancolombia.api.dto.LoginRes;
@@ -44,24 +43,6 @@ public class RouterRest {
                                 @ApiResponse(responseCode = "500", description = "Internal server error")
                             })
             ),
-            @RouterOperation( path = "/api/v1/admin/usuarios",
-                    produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenRegisterPrivilegedUser",
-                    operation = @Operation( operationId = "createPrivilegedUser",
-                            summary = "Register privileged user",
-                            description = "Registers a new privileged user (role ADMIN or ASESOR) in the system",
-                            requestBody = @RequestBody(
-                                description = "Data of the privileged user to register",
-                                required = true,
-                                content = @Content(schema = @Schema(implementation = AdminUserRegisterReq.class))
-                            ),
-                            responses = {
-                                @ApiResponse(responseCode = "201", description = "User created successfully",
-                                    content = @Content(schema = @Schema(implementation = UserRegisterRes.class))),
-                                @ApiResponse(responseCode = "400", description = "Invalid input data or role"),
-                                @ApiResponse(responseCode = "409", description = "The email is already registered"),
-                                @ApiResponse(responseCode = "500", description = "Internal server error")
-                            })
-            ),
             @RouterOperation( path = "/api/v1/login",
                     produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenLogin",
                     operation = @Operation( operationId = "login",
@@ -82,7 +63,6 @@ public class RouterRest {
             )})
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/usuarios"), handler::listenCreateUser)
-                .andRoute(POST("/api/v1/admin/usuarios"), handler::listenRegisterPrivilegedUser)
                 .andRoute(POST("/api/v1/login"), handler::listenLogin);
     }
 }
