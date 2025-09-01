@@ -1,6 +1,7 @@
 package co.com.bancolombia.api.config;
 
 import co.com.bancolombia.model.user.exception.UserAlreadyExistsException;
+import co.com.bancolombia.model.user.exception.InvalidCredentialsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +88,7 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         return switch (ex) {
             case UserAlreadyExistsException ignored -> HttpStatus.CONFLICT;
             case ConstraintViolationException ignored -> HttpStatus.BAD_REQUEST;
+            case InvalidCredentialsException ignored -> HttpStatus.UNAUTHORIZED;
             case IllegalArgumentException ignored -> HttpStatus.BAD_REQUEST;
             case WebExchangeBindException ignored -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
@@ -129,6 +131,7 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             case UserAlreadyExistsException e -> e.getMessage();
             case ConstraintViolationException e -> VALIDATION_FAILED;
             case IllegalArgumentException e -> e.getMessage();
+            case InvalidCredentialsException e -> e.getMessage();
             case WebExchangeBindException e -> VALIDATION_FAILED;
             default -> UNEXPECTED_ERROR_MESSAGE;
         };
@@ -139,6 +142,7 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             case UserAlreadyExistsException ignored -> handleConflict(throwable.getMessage());
             case ConstraintViolationException ignored -> handleBadRequest(throwable.getMessage());
             case IllegalArgumentException ignored -> handleBadRequest(throwable.getMessage());
+            case InvalidCredentialsException ignored -> handleUnauthorized(throwable.getMessage());
             case WebExchangeBindException webExchangeBindException ->
                     handleValidationException(webExchangeBindException);
             default -> handleInternalServerError(throwable.getMessage());
@@ -190,6 +194,17 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         error.put(STATUS_FIELD, HttpStatus.INTERNAL_SERVER_ERROR.value());
 
         return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
+    }
+
+    private static Mono<ServerResponse> handleUnauthorized(String message) {
+        Map<String, Object> error = new HashMap<>();
+        error.put(ERROR_FIELD, "Unauthorized");
+        error.put(MESSAGE_FIELD, message);
+        error.put(STATUS_FIELD, HttpStatus.UNAUTHORIZED.value());
+
+        return ServerResponse.status(HttpStatus.UNAUTHORIZED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(error);
     }

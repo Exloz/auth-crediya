@@ -3,8 +3,11 @@ package co.com.bancolombia.api;
 import co.com.bancolombia.api.dto.UserRegisterReq;
 import co.com.bancolombia.api.dto.AdminUserRegisterReq;
 import co.com.bancolombia.api.mapper.UserMapper;
+import co.com.bancolombia.api.dto.LoginReq;
+import co.com.bancolombia.api.dto.LoginRes;
 import co.com.bancolombia.model.user.RoleId;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
+import co.com.bancolombia.usecase.auth.AuthenticateUserUseCasePort;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,7 @@ public class Handler {
     private static final String USER_REGISTERED_SUCCESSFULLY = "User registered successfully";
     private static final String ERROR_REGISTERING_USER = "Error registering user: {}";
     private static final String RECEIVED_PRIVILEGED_REGISTRATION_REQUEST = "Received privileged user registration request: {}";
+    private static final String RECEIVED_LOGIN_REQUEST = "Received login request for: {}";
 
     // Validation messages
     private static final String VALIDATION_ERRORS_PREFIX = "Validation errors: ";
@@ -37,6 +41,7 @@ public class Handler {
     private final UserUseCasePort useCase;
     private final UserMapper mapper;
     private final Validator validator;
+    private final AuthenticateUserUseCasePort authenticateUserUseCase;
 
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
         return request.bodyToMono(UserRegisterReq.class)
@@ -104,5 +109,26 @@ public class Handler {
             return origin.getClassName() + "." + origin.getMethodName() + " (line " + origin.getLineNumber() + ")";
         }
         return UNKNOWN_ORIGIN;
+    }
+
+    public Mono<ServerResponse> listenLogin(ServerRequest request) {
+        return request.bodyToMono(LoginReq.class)
+                .doOnNext(req -> log.info(RECEIVED_LOGIN_REQUEST, req.email()))
+                .flatMap(this::validateRequest)
+                .flatMap(req -> authenticateUserUseCase.authenticate(req.email(), req.password()))
+                .flatMap(user -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(new LoginRes(user.getUserId(), user.getEmail(), user.getRoleId()))
+                );
+    }
+
+    private Mono<LoginReq> validateRequest(LoginReq request) {
+        Set<ConstraintViolation<LoginReq>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            StringBuilder message = new StringBuilder(VALIDATION_ERRORS_PREFIX);
+            violations.forEach(violation -> message.append(violation.getMessage()).append(VALIDATION_ERROR_SEPARATOR));
+            return Mono.error(new IllegalArgumentException(message.toString()));
+        }
+        return Mono.just(request);
     }
 }
