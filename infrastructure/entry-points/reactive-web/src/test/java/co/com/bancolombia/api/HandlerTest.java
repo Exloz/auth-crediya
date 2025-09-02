@@ -67,6 +67,7 @@ class HandlerTest {
             "juan.perez@email.com",
             new BigDecimal("2500000.00"),
             "+57 300 123 4567",
+            "securePassword123",
             null
         );
 

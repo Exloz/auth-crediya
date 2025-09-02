@@ -5,6 +5,7 @@ import co.com.bancolombia.model.user.RoleId;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.CredentialsRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.usecase.user.PasswordEncoderPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -29,6 +30,7 @@ public class BootstrapAdminInitializer implements ApplicationRunner {
     private final BootstrapProperties properties;
     private final UserRepository userRepository;
     private final CredentialsRepository credentialsRepository;
+    private final PasswordEncoderPort passwordEncoder;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -79,9 +81,10 @@ public class BootstrapAdminInitializer implements ApplicationRunner {
                         log.info(BOOTSTRAP_CREDS_EXIST, user.getUserId());
                         return Mono.empty();
                     }
+                    String hashedPassword = passwordEncoder.encodePassword(password);
                     var creds = Credentials.builder()
                             .userId(user.getUserId())
-                            .password(password)
+                            .password(hashedPassword)
                             .build();
                     return credentialsRepository.save(creds)
                             .doOnNext(c -> log.info(BOOTSTRAP_CREDS_CREATED, user.getUserId()));

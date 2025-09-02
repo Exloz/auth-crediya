@@ -5,6 +5,7 @@ import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.exception.InvalidCredentialsException;
 import co.com.bancolombia.model.user.gateways.CredentialsRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.usecase.user.PasswordEncoderPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -15,6 +16,7 @@ public class AuthenticateUserUseCase implements AuthenticateUserUseCasePort {
 
     private final UserRepository userRepository;
     private final CredentialsRepository credentialsRepository;
+    private final PasswordEncoderPort passwordEncoder;
 
     @Override
     public Mono<User> authenticate(String email, String password) {
@@ -34,8 +36,8 @@ public class AuthenticateUserUseCase implements AuthenticateUserUseCasePort {
     }
 
     private Mono<Void> verifyPassword(String rawPassword, Credentials creds) {
-        // Plain comparison for now; hashing to be added later
-        boolean match = creds.getPassword() != null && creds.getPassword().equals(rawPassword);
+        boolean match = creds.getPassword() != null &&
+                       passwordEncoder.matches(rawPassword, creds.getPassword());
         return match ? Mono.empty() : Mono.error(new InvalidCredentialsException(INVALID_CREDENTIALS));
     }
 }

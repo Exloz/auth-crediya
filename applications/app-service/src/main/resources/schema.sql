@@ -20,3 +20,14 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_id_document ON users(id_document);
 CREATE INDEX IF NOT EXISTS idx_users_role_id ON users(role_id);
+
+-- Credentials table for secure password storage
+CREATE TABLE IF NOT EXISTS credentials (
+    user_id BIGINT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index for credentials lookup
+CREATE INDEX IF NOT EXISTS idx_credentials_user_id ON credentials(user_id);

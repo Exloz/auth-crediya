@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(source = "role", target = "roleId")
+//    @Mapping(target = "password", ignore = true)
     User toModel(UserRegisterReq usrReq);
 
     UserRegisterRes toResponse(User user);

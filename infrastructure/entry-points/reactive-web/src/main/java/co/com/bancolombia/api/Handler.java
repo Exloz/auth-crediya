@@ -45,12 +45,13 @@ public class Handler {
         return request.bodyToMono(UserRegisterReq.class)
                 .doOnNext(req -> log.info(RECEIVED_USER_REGISTRATION_REQUEST, req))
                 .flatMap(this::validateRequest)
-                .map(mapper::toModel)
-                .flatMap(useCase::createUser)
-                .map(mapper::toResponse)
-                .flatMap(userRes -> ServerResponse.status(HttpStatus.CREATED)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(userRes))
+                .flatMap(req ->
+                    useCase.createUser(mapper.toModel(req), req.password())
+                            .map(mapper::toResponse)
+                            .flatMap(userRes -> ServerResponse.status(HttpStatus.CREATED)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(userRes))
+                )
                 .doOnSuccess(response -> log.info(USER_REGISTERED_SUCCESSFULLY))
                 .doOnError(error -> log.error(ERROR_REGISTERING_USER, getOriginOfError(error)));
     }
@@ -87,8 +88,6 @@ public class Handler {
                         .bodyValue(loginRes)
                 );
     }
-
-
 
     private Mono<LoginReq> validateRequest(LoginReq request) {
         Set<ConstraintViolation<LoginReq>> violations = validator.validate(request);

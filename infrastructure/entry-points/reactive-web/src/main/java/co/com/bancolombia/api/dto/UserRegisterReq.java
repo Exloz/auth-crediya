@@ -38,6 +38,11 @@ public record UserRegisterReq(
         @Schema(description = "Phone number", example = "+57 300 123 4567")
         String phoneNumber,
 
+        @Schema(description = "User password", example = "securePassword123")
+        @NotBlank(message = "Password is required")
+        @Size(min = 8, message = "Password must be at least 8 characters long")
+        String password,
+
         @Schema(description = "Role to assign (optional)", example = "USER", allowableValues = {"USER", "ADMIN", "ASESOR"})
         String role
 ) {
