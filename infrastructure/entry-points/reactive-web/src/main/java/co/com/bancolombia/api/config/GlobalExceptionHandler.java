@@ -11,6 +11,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -54,6 +56,12 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
     // Content types
     private static final String PROBLEM_JSON_CONTENT_TYPE = "application/problem+json";
 
+    // Authentication/Authorization messages
+    private static final String AUTHENTICATION_FAILED_MSG = "Authentication failed";
+    private static final String ACCESS_DENIED_MSG = "Access denied";
+    private static final String UNAUTHORIZED_ERROR = "Unauthorized";
+    private static final String FORBIDDEN_ERROR = "Forbidden";
+
     private final ObjectMapper objectMapper;
 
     @Override
@@ -89,6 +97,8 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             case UserAlreadyExistsException ignored -> HttpStatus.CONFLICT;
             case ConstraintViolationException ignored -> HttpStatus.BAD_REQUEST;
             case InvalidCredentialsException ignored -> HttpStatus.UNAUTHORIZED;
+            case AuthenticationException ignored -> HttpStatus.UNAUTHORIZED;
+            case AccessDeniedException ignored -> HttpStatus.FORBIDDEN;
             case IllegalArgumentException ignored -> HttpStatus.BAD_REQUEST;
             case WebExchangeBindException ignored -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
@@ -109,7 +119,7 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             List<Map<String, String>> violations = webExchangeBindException.getFieldErrors().stream()
                     .map(error -> Map.of(
                             "field", error.getField(),
-                            "message", error.getDefaultMessage()
+                            MESSAGE_FIELD, error.getDefaultMessage()
                     ))
                     .toList();
             pd.setProperty("violations", violations);
@@ -117,7 +127,7 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             List<Map<String, String>> violations = cve.getConstraintViolations().stream()
                     .map(v -> Map.of(
                             "field", v.getPropertyPath().toString(),
-                            "message", v.getMessage()
+                            MESSAGE_FIELD, v.getMessage()
                     ))
                     .toList();
             pd.setProperty("violations", violations);
@@ -132,6 +142,8 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             case ConstraintViolationException e -> VALIDATION_FAILED;
             case IllegalArgumentException e -> e.getMessage();
             case InvalidCredentialsException e -> e.getMessage();
+            case AuthenticationException e -> AUTHENTICATION_FAILED_MSG;
+            case AccessDeniedException e -> ACCESS_DENIED_MSG;
             case WebExchangeBindException e -> VALIDATION_FAILED;
             default -> UNEXPECTED_ERROR_MESSAGE;
         };
@@ -143,6 +155,8 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             case ConstraintViolationException ignored -> handleBadRequest(throwable.getMessage());
             case IllegalArgumentException ignored -> handleBadRequest(throwable.getMessage());
             case InvalidCredentialsException ignored -> handleUnauthorized(throwable.getMessage());
+            case AuthenticationException ignored -> handleUnauthorized(AUTHENTICATION_FAILED_MSG);
+            case AccessDeniedException ignored -> handleForbidden(ACCESS_DENIED_MSG);
             case WebExchangeBindException webExchangeBindException ->
                     handleValidationException(webExchangeBindException);
             default -> handleInternalServerError(throwable.getMessage());
@@ -200,11 +214,22 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
 
     private static Mono<ServerResponse> handleUnauthorized(String message) {
         Map<String, Object> error = new HashMap<>();
-        error.put(ERROR_FIELD, "Unauthorized");
+        error.put(ERROR_FIELD, UNAUTHORIZED_ERROR);
         error.put(MESSAGE_FIELD, message);
         error.put(STATUS_FIELD, HttpStatus.UNAUTHORIZED.value());
 
         return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
+    }
+
+    private static Mono<ServerResponse> handleForbidden(String message) {
+        Map<String, Object> error = new HashMap<>();
+        error.put(ERROR_FIELD, FORBIDDEN_ERROR);
+        error.put(MESSAGE_FIELD, message);
+        error.put(STATUS_FIELD, HttpStatus.FORBIDDEN.value());
+
+        return ServerResponse.status(HttpStatus.FORBIDDEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(error);
     }

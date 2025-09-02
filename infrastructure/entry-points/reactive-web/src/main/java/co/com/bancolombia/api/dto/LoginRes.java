@@ -10,6 +10,8 @@ public record LoginRes(
         @Schema(description = "User email", example = "user@example.com")
         String email,
         @Schema(description = "User role", example = "USER")
-        RoleId roleId
+        RoleId roleId,
+        @Schema(description = "JWT token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+        String token
 ) {}
 

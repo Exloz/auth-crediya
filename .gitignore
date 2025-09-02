@@ -335,3 +335,7 @@ gradle-app.setting
 *.hprof
 build-cache
 .vscode/settings.json
+
+# JWT Keys
+# -----
+**/keys/private.pem

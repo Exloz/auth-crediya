@@ -1,5 +1,6 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.config.JwtService;
 import co.com.bancolombia.api.dto.UserRegisterReq;
 import co.com.bancolombia.api.mapper.UserMapper;
 import co.com.bancolombia.api.dto.LoginReq;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -36,7 +38,9 @@ public class Handler {
     private final UserMapper mapper;
     private final Validator validator;
     private final AuthenticateUserUseCasePort authenticateUserUseCase;
+    private final JwtService jwtService;
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
         return request.bodyToMono(UserRegisterReq.class)
                 .doOnNext(req -> log.info(RECEIVED_USER_REGISTRATION_REQUEST, req))
@@ -74,11 +78,17 @@ public class Handler {
                 .doOnNext(req -> log.info(RECEIVED_LOGIN_REQUEST, req.email()))
                 .flatMap(this::validateRequest)
                 .flatMap(req -> authenticateUserUseCase.authenticate(req.email(), req.password()))
-                .flatMap(user -> ServerResponse.ok()
+                .map(user -> {
+                    String token = jwtService.generateToken(user.getEmail(), user.getUserId(), user.getRoleId().name());
+                    return new LoginRes(user.getUserId(), user.getEmail(), user.getRoleId(), token);
+                })
+                .flatMap(loginRes -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(new LoginRes(user.getUserId(), user.getEmail(), user.getRoleId()))
+                        .bodyValue(loginRes)
                 );
     }
+
+
 
     private Mono<LoginReq> validateRequest(LoginReq request) {
         Set<ConstraintViolation<LoginReq>> violations = validator.validate(request);

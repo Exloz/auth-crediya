@@ -39,3 +39,11 @@ springdoc:
     path: /swagger-ui.html
     url: /api-docs
     enabled: true
+
+# JWT Configuration
+jwt:
+  issuer: "auth-crediya"
+  expiry: 3600000  # 1 hour
+  algorithm: "RS256"
+  private-key-path: "classpath:keys/private.pem"
+  public-key-path: "classpath:keys/public.pem"

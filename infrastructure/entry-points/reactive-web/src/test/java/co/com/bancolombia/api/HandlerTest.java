@@ -1,5 +1,6 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.config.JwtService;
 import co.com.bancolombia.api.dto.UserRegisterReq;
 import co.com.bancolombia.api.dto.UserRegisterRes;
 import co.com.bancolombia.model.user.User;
@@ -47,12 +48,15 @@ class HandlerTest {
     @Mock
     private Validator validator;
 
+    @Mock
+    private JwtService jwtService;
+
     private UserRegisterReq validUserRequest;
     private UserRegisterRes userResponse;
 
     @BeforeEach
     void setUp() {
-        handler = new Handler(userUseCasePort, userMapper, validator, authenticateUserUseCasePort);
+        handler = new Handler(userUseCasePort, userMapper, validator, authenticateUserUseCasePort, jwtService);
 
         validUserRequest = new UserRegisterReq(
             "Juan",
