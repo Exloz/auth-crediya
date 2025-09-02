@@ -5,6 +5,7 @@ import co.com.bancolombia.api.dto.UserRegisterRes;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
 import co.com.bancolombia.api.mapper.UserMapper;
+import co.com.bancolombia.usecase.auth.AuthenticateUserUseCasePort;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +42,9 @@ class HandlerTest {
     private UserMapper userMapper;
 
     @Mock
+    private AuthenticateUserUseCasePort authenticateUserUseCasePort;
+
+    @Mock
     private Validator validator;
 
     private UserRegisterReq validUserRequest;
@@ -48,7 +52,7 @@ class HandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new Handler(userUseCasePort, userMapper, validator);
+        handler = new Handler(userUseCasePort, userMapper, validator, authenticateUserUseCasePort);
 
         validUserRequest = new UserRegisterReq(
             "Juan",
@@ -58,7 +62,8 @@ class HandlerTest {
             "12345678",
             "juan.perez@email.com",
             new BigDecimal("2500000.00"),
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            null
         );
 
         userResponse = new UserRegisterRes(
@@ -120,7 +125,7 @@ class HandlerTest {
 
         // Then
         StepVerifier.create(responseMono)
-            .expectError(IllegalArgumentException.class)
+            .expectError(jakarta.validation.ConstraintViolationException.class)
             .verify();
     }
 

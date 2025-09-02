@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "roleId", ignore = true)
+    @Mapping(source = "role", target = "roleId")
     User toModel(UserRegisterReq usrReq);
 
     UserRegisterRes toResponse(User user);

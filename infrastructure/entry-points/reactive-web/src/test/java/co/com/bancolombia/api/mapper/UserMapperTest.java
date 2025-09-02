@@ -28,7 +28,8 @@ class UserMapperTest {
                 "12345678",
                 "john.doe@example.com",
                 BigDecimal.valueOf(1000000),
-                "3001234567"
+                "3001234567",
+                "USER"
         );
 
         // When
@@ -44,7 +45,7 @@ class UserMapperTest {
         assertThat(user.getAddress()).isEqualTo("Calle 123");
         assertThat(user.getBirthDate()).isEqualTo(request.birthDate());
         assertThat(user.getBaseSalary()).isEqualTo(BigDecimal.valueOf(1000000));
-        assertThat(user.getRoleId()).isEqualTo(RoleId.USER); // This is the key assertion
+        assertThat(user.getRoleId()).isEqualTo(RoleId.USER);
         assertThat(user.getUserId()).isNull(); // Should be ignored
     }
 

@@ -55,7 +55,8 @@ class RouterRestTest {
             "12345678",
             "juan.perez@email.com",
             new BigDecimal("2500000.00"),
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            null // role omitted -> defaults to USER
         );
 
         userResponse = new UserRegisterRes(
@@ -114,7 +115,8 @@ class RouterRestTest {
             "12345678",
             "invalid-email", // Invalid email
             new BigDecimal("2500000.00"),
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            null
         );
 
         // When & Then
@@ -138,7 +140,8 @@ class RouterRestTest {
             "12345678",
             "juan.perez@email.com",
             null, // Null baseSalary
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            null
         );
 
         // When & Then
@@ -162,7 +165,8 @@ class RouterRestTest {
             "12345678",
             "juan.perez@email.com",
             new BigDecimal("20000000.00"), // Salary too high (> 15,000,000)
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            null
         );
 
         // When & Then

@@ -28,8 +28,8 @@ public class RouterRest {
             @RouterOperation( path = "/api/v1/usuarios",
                     produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenCreateUser",
                     operation = @Operation( operationId = "createUser",
-                            summary = "Register client user",
-                            description = "Registers a new client user (role USER) in the system",
+                            summary = "Register user",
+                            description = "Registers a new user. Role is optional and validated in the use case. If a valid role is provided (USER, ADMIN, ASESOR), it will be applied. If omitted or blank, the role is inferred by business rules: emails ending with @crediya.com become ADMIN; otherwise USER.",
                             requestBody = @RequestBody(
                                 description = "Data of the client to register",
                                 required = true,

@@ -4,4 +4,4 @@ public enum RoleId {
     USER,
     ADMIN,
     ASESOR
-    }
+}

@@ -1,14 +1,13 @@
 package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.ValidationMessages;
 import co.com.bancolombia.api.mapper.UserMapper;
 import co.com.bancolombia.api.dto.LoginReq;
 import co.com.bancolombia.api.dto.LoginRes;
-import co.com.bancolombia.model.user.RoleId;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
 import co.com.bancolombia.usecase.auth.AuthenticateUserUseCasePort;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,15 +25,11 @@ import java.util.Set;
 @Slf4j
 public class Handler {
 
-    // Log messages
     private static final String RECEIVED_USER_REGISTRATION_REQUEST = "Received user registration request: {}";
     private static final String USER_REGISTERED_SUCCESSFULLY = "User registered successfully";
     private static final String ERROR_REGISTERING_USER = "Error registering user: {}";
     private static final String RECEIVED_LOGIN_REQUEST = "Received login request for: {}";
 
-    // Validation messages
-    private static final String VALIDATION_ERRORS_PREFIX = "Validation errors: ";
-    private static final String VALIDATION_ERROR_SEPARATOR = "; ";
     private static final String UNKNOWN_ORIGIN = "Unknown origin";
 
     private final UserUseCasePort useCase;
@@ -46,17 +41,7 @@ public class Handler {
         return request.bodyToMono(UserRegisterReq.class)
                 .doOnNext(req -> log.info(RECEIVED_USER_REGISTRATION_REQUEST, req))
                 .flatMap(this::validateRequest)
-                .map(req -> {
-                    var user = mapper.toModel(req);
-                    String roleStr = req.role() == null || req.role().isBlank() ? "USER" : req.role().trim().toUpperCase();
-                    switch (roleStr) {
-                        case "USER" -> user.setRoleId(RoleId.USER);
-                        case "ADMIN" -> user.setRoleId(RoleId.ADMIN);
-                        case "ASESOR" -> user.setRoleId(RoleId.ASESOR);
-                        default -> throw new IllegalArgumentException("Invalid role: " + roleStr);
-                    }
-                    return user;
-                })
+                .map(mapper::toModel)
                 .flatMap(useCase::createUser)
                 .map(mapper::toResponse)
                 .flatMap(userRes -> ServerResponse.status(HttpStatus.CREATED)
@@ -67,36 +52,10 @@ public class Handler {
     }
 
 
-    //TODO: Refactor to reduce complexity
     private Mono<UserRegisterReq> validateRequest(UserRegisterReq request) {
         Set<ConstraintViolation<UserRegisterReq>> violations = validator.validate(request);
-        StringBuilder message = new StringBuilder();
         if (!violations.isEmpty()) {
-            message.append(VALIDATION_ERRORS_PREFIX);
-            violations.forEach(violation -> message.append(violation.getMessage()).append(VALIDATION_ERROR_SEPARATOR));
-        }
-
-        String roleStr = (request.role() == null || request.role().isBlank()) ? "USER" : request.role().trim().toUpperCase();
-        if (!("USER".equals(roleStr) || "ADMIN".equals(roleStr) || "ASESOR".equals(roleStr))) {
-            message.append("Invalid role: ").append(roleStr).append(VALIDATION_ERROR_SEPARATOR);
-        } else if ("USER".equals(roleStr)) {
-            if (request.birthDate() == null) {
-                message.append(ValidationMessages.BIRTH_DATE_REQUIRED).append(VALIDATION_ERROR_SEPARATOR);
-            }
-            if (request.baseSalary() == null) {
-                message.append(ValidationMessages.BASE_SALARY_REQUIRED).append(VALIDATION_ERROR_SEPARATOR);
-            }
-        } else {
-            if (request.idDocument() == null || request.idDocument().isBlank()) {
-                message.append(ValidationMessages.ID_DOCUMENT_REQUIRED).append(VALIDATION_ERROR_SEPARATOR);
-            }
-            if (request.phoneNumber() == null || request.phoneNumber().isBlank()) {
-                message.append(ValidationMessages.PHONE_REQUIRED).append(VALIDATION_ERROR_SEPARATOR);
-            }
-        }
-
-        if (message.length() > 0) {
-            return Mono.error(new IllegalArgumentException(message.toString()));
+            return Mono.error(new ConstraintViolationException(violations));
         }
         return Mono.just(request);
     }
@@ -124,9 +83,7 @@ public class Handler {
     private Mono<LoginReq> validateRequest(LoginReq request) {
         Set<ConstraintViolation<LoginReq>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
-            StringBuilder message = new StringBuilder(VALIDATION_ERRORS_PREFIX);
-            violations.forEach(violation -> message.append(violation.getMessage()).append(VALIDATION_ERROR_SEPARATOR));
-            return Mono.error(new IllegalArgumentException(message.toString()));
+            return Mono.error(new ConstraintViolationException(violations));
         }
         return Mono.just(request);
     }
