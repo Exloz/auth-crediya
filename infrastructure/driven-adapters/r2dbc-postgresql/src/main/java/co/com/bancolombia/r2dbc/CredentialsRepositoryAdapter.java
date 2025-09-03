@@ -21,9 +21,9 @@ public class CredentialsRepositoryAdapter implements CredentialsRepository {
 
     @Override
     public Mono<Credentials> save(Credentials credentials) {
-        CredentialsEntity entity = mapper.map(credentials, CredentialsEntity.class);
-        return repository.save(entity)
-                .map(saved -> mapper.map(saved, Credentials.class));
+        // Use upsert to handle both INSERT and UPDATE in one operation
+        return repository.upsertCredentials(credentials.getUserId(), credentials.getPassword())
+                .then(findByUserId(credentials.getUserId()));
     }
 
     @Override

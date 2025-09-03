@@ -2,6 +2,7 @@ package co.com.bancolombia.security.config;
 
 import co.com.bancolombia.usecase.auth.TokenServicePort;
 import java.util.Map;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
@@ -83,22 +84,22 @@ public class JwtAdapter implements TokenServicePort {
     @Override
     public String generateToken(String email, Long userId, String role) {
         return Jwts.builder()
-                .setSubject(email)
+                .subject(email)
                 .claim("userId", userId)
                 .claim("role", role)
-                .setIssuer(jwtIssuer)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiry))
+                .issuer(jwtIssuer)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiry))
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
     }
 
     @Override
     public Map<String, Object> validateToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(publicKey)
+        return Jwts.parser()
+                .verifyWith(publicKey)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
