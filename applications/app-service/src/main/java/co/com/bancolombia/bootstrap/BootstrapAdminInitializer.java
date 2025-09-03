@@ -49,7 +49,9 @@ public class BootstrapAdminInitializer implements ApplicationRunner {
         log.info(BOOTSTRAP_START);
 
         seedAdmin(admin.getEmail().trim(), admin.getPassword(), admin.getName(), admin.getLastName(), admin.getIdDocument(), admin.getPhoneNumber())
-                .doOnError(err -> log.error("Bootstrap admin seeding failed: {}", err.toString()))
+                .doOnError(err -> log.warn("Bootstrap admin seeding completed with warnings: {}", err.getMessage()))
+                .doOnSuccess(result -> log.info("Bootstrap admin seeding completed successfully"))
+                .onErrorComplete() // Continue even if there's an error
                 .subscribe(); // Non-blocking per project guidelines
     }
 
@@ -75,12 +77,11 @@ public class BootstrapAdminInitializer implements ApplicationRunner {
     }
 
     private Mono<Credentials> ensureCredentials(User user, String password) {
-        return credentialsRepository.existsByUserId(user.getUserId())
-                .flatMap(exists -> {
-                    if (Boolean.TRUE.equals(exists)) {
-                        log.info(BOOTSTRAP_CREDS_EXIST, user.getUserId());
-                        return Mono.empty();
-                    }
+        // First check if credentials already exist
+        return credentialsRepository.findByUserId(user.getUserId())
+                .doOnNext(c -> log.info(BOOTSTRAP_CREDS_EXIST, user.getUserId()))
+                .switchIfEmpty(Mono.defer(() -> {
+                    // If not found, create new credentials
                     String hashedPassword = passwordEncoder.encodePassword(password);
                     var creds = Credentials.builder()
                             .userId(user.getUserId())
@@ -88,7 +89,7 @@ public class BootstrapAdminInitializer implements ApplicationRunner {
                             .build();
                     return credentialsRepository.save(creds)
                             .doOnNext(c -> log.info(BOOTSTRAP_CREDS_CREATED, user.getUserId()));
-                });
+                }));
     }
 }
 

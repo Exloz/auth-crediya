@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix = "bootstrap")
 public class BootstrapProperties {
-    private boolean enabled = false;
+    private boolean enabled = true;
     private Admin admin = new Admin();
 
     @Getter
