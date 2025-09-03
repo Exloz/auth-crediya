@@ -2,6 +2,7 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.usecase.auth.TokenServicePort;
 import co.com.bancolombia.api.dto.register.UserRegisterReq;
+import co.com.bancolombia.api.dto.user.UserInfoRes;
 import co.com.bancolombia.api.mapper.UserMapper;
 import co.com.bancolombia.api.dto.login.LoginReq;
 import co.com.bancolombia.api.dto.login.LoginRes;
@@ -95,5 +96,16 @@ public class Handler {
             return Mono.error(new ConstraintViolationException(violations));
         }
         return Mono.just(request);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
+    public Mono<ServerResponse> listenGetUserByIdDocument(ServerRequest request) {
+        String idDocument = request.pathVariable("idDocument");
+        return useCase.getUserByIdDocument(idDocument)
+                .map(mapper::toUserInfoResponse)
+                .flatMap(userInfo -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(userInfo))
+                .switchIfEmpty(ServerResponse.notFound().build());
     }
 }

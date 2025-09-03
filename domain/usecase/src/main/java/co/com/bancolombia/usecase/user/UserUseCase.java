@@ -32,6 +32,11 @@ public class UserUseCase implements UserUseCasePort {
                 });
     }
 
+    @Override
+    public Mono<User> getUserByIdDocument(String idDocument) {
+        return userRepository.findByIdDocument(idDocument);
+    }
+
     private RoleId inferRoleFromBusinessRules(User user) {
         String email = user.getEmail();
         if (user.getRoleId() == RoleId.ADMIN && email != null && email.toLowerCase().endsWith("@crediya.com")) {
