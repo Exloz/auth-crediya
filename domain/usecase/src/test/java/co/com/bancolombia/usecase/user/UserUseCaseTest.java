@@ -1,12 +1,15 @@
 package co.com.bancolombia.usecase.user;
 
+import co.com.bancolombia.model.user.Credentials;
 import co.com.bancolombia.model.user.RoleId;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.exception.UserAlreadyExistsException;
+import co.com.bancolombia.model.user.gateways.CredentialsRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -15,23 +18,27 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import org.mockito.Mockito;
 
 @ExtendWith(MockitoExtension.class)
 class UserUseCaseTest {
 
-    private UserUseCase userUseCase;
-
+    @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private CredentialsRepository credentialsRepository;
+
+    @Mock
+    private PasswordEncoderPort passwordEncoderPort;
+
+    private UserUseCase userUseCase;
 
     private User validUser;
 
     @BeforeEach
     void setUp() {
-        userRepository = mock(UserRepository.class, Mockito.RETURNS_DEEP_STUBS);
-        userUseCase = new UserUseCase(userRepository);
+        userUseCase = new UserUseCase(userRepository, credentialsRepository, passwordEncoderPort);
 
         validUser = User.builder()
             .name("Juan")
@@ -48,6 +55,7 @@ class UserUseCaseTest {
     @Test
     void shouldCreateUserSuccessfully() {
         // Given
+        String rawPassword = "testPassword123";
         User savedUser = validUser.toBuilder()
             .userId(1L)
             .roleId(RoleId.USER)
@@ -57,9 +65,13 @@ class UserUseCaseTest {
             .thenReturn(Mono.empty());
         when(userRepository.saveUser(any(User.class)))
             .thenReturn(Mono.just(savedUser));
+        when(passwordEncoderPort.encodePassword(rawPassword))
+            .thenReturn("$2a$10$hashedPassword");
+        when(credentialsRepository.save(any(Credentials.class)))
+            .thenReturn(Mono.empty());
 
         // When
-        Mono<User> result = userUseCase.createUser(validUser);
+        Mono<User> result = userUseCase.createUser(validUser, rawPassword);
 
         // Then
         StepVerifier.create(result)
@@ -77,8 +89,10 @@ class UserUseCaseTest {
     @Test
     void shouldAssignAdminRoleForCrediyaEmail() {
         // Given
+        String rawPassword = "testPassword123";
         User adminUser = validUser.toBuilder()
             .email("admin@crediya.com")
+            .roleId(RoleId.ADMIN)
             .build();
         User savedUser = adminUser.toBuilder()
             .userId(1L)
@@ -89,9 +103,13 @@ class UserUseCaseTest {
             .thenReturn(Mono.empty());
         when(userRepository.saveUser(any(User.class)))
             .thenReturn(Mono.just(savedUser));
+        when(passwordEncoderPort.encodePassword(rawPassword))
+            .thenReturn("$2a$10$hashedPassword");
+        when(credentialsRepository.save(any(Credentials.class)))
+            .thenReturn(Mono.empty());
 
         // When
-        Mono<User> result = userUseCase.createUser(adminUser);
+        Mono<User> result = userUseCase.createUser(adminUser, rawPassword);
 
         // Then
         StepVerifier.create(result)
@@ -105,13 +123,18 @@ class UserUseCaseTest {
     @Test
     void shouldAssignUserRoleForRegularEmail() {
         // Given
+        String rawPassword = "testPassword123";
         when(userRepository.validateEmailNotExists(validUser))
             .thenReturn(Mono.empty());
         when(userRepository.saveUser(any(User.class)))
             .thenReturn(Mono.just(validUser.toBuilder().userId(1L).roleId(RoleId.USER).build()));
+        when(passwordEncoderPort.encodePassword(rawPassword))
+            .thenReturn("$2a$10$hashedPassword");
+        when(credentialsRepository.save(any(Credentials.class)))
+            .thenReturn(Mono.empty());
 
         // When
-        Mono<User> result = userUseCase.createUser(validUser);
+        Mono<User> result = userUseCase.createUser(validUser, rawPassword);
 
         // Then
         StepVerifier.create(result)
@@ -125,16 +148,15 @@ class UserUseCaseTest {
     @Test
     void shouldReturnErrorWhenEmailAlreadyExists() {
         // Given
+        String rawPassword = "testPassword123";
         UserAlreadyExistsException exception = new UserAlreadyExistsException("Email already exists");
 
         // Mock the repository to return error on validateEmailNotExists
         when(userRepository.validateEmailNotExists(any(User.class)))
             .thenReturn(Mono.error(exception));
-        when(userRepository.saveUser(any(User.class)))
-            .thenReturn(Mono.just(validUser)); // This shouldn't be called but just in case
 
         // When
-        Mono<User> result = userUseCase.createUser(validUser);
+        Mono<User> result = userUseCase.createUser(validUser, rawPassword);
 
         // Then
         StepVerifier.create(result)
@@ -145,6 +167,7 @@ class UserUseCaseTest {
     @Test
     void shouldReturnErrorWhenSaveFails() {
         // Given
+        String rawPassword = "testPassword123";
         RuntimeException saveException = new RuntimeException("Database error");
 
         when(userRepository.validateEmailNotExists(validUser))
@@ -153,7 +176,7 @@ class UserUseCaseTest {
             .thenReturn(Mono.error(saveException));
 
         // When
-        Mono<User> result = userUseCase.createUser(validUser);
+        Mono<User> result = userUseCase.createUser(validUser, rawPassword);
 
         // Then
         StepVerifier.create(result)

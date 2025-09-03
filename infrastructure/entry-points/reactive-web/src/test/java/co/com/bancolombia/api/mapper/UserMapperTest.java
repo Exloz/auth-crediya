@@ -29,6 +29,7 @@ class UserMapperTest {
                 "john.doe@example.com",
                 BigDecimal.valueOf(1000000),
                 "3001234567",
+                "securePassword123",
                 "USER"
         );
 

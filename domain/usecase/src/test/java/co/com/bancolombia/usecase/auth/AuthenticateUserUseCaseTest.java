@@ -28,14 +28,13 @@ class AuthenticateUserUseCaseTest {
     @Mock
     private CredentialsRepository credentialsRepository;
 
-    private PasswordEncoder passwordEncoder;
+    @Mock
     private PasswordEncoderPort passwordEncoderPort;
+
     private AuthenticateUserUseCase authenticateUserUseCase;
 
     @BeforeEach
     void setUp() {
-        passwordEncoder = new BCryptPasswordEncoder();
-        passwordEncoderPort = new co.com.bancolombia.security.config.BCryptPasswordEncoderAdapter(passwordEncoder);
         authenticateUserUseCase = new AuthenticateUserUseCase(
             userRepository,
             credentialsRepository,
@@ -48,7 +47,7 @@ class AuthenticateUserUseCaseTest {
         // Given
         String email = "test@example.com";
         String rawPassword = "testPassword123";
-        String hashedPassword = passwordEncoderPort.encodePassword(rawPassword);
+        String hashedPassword = "$2a$10$hashedPassword";
 
         User user = User.builder()
             .userId(1L)
@@ -62,6 +61,7 @@ class AuthenticateUserUseCaseTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Mono.just(user));
         when(credentialsRepository.findByUserId(1L)).thenReturn(Mono.just(credentials));
+        when(passwordEncoderPort.matches(rawPassword, hashedPassword)).thenReturn(true);
 
         // When & Then
         StepVerifier.create(authenticateUserUseCase.authenticate(email, rawPassword))
@@ -75,7 +75,7 @@ class AuthenticateUserUseCaseTest {
         String email = "test@example.com";
         String wrongPassword = "wrongPassword";
         String correctPassword = "correctPassword";
-        String hashedPassword = passwordEncoderPort.encodePassword(correctPassword);
+        String hashedPassword = "$2a$10$hashedPassword";
 
         User user = User.builder()
             .userId(1L)
@@ -89,6 +89,7 @@ class AuthenticateUserUseCaseTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Mono.just(user));
         when(credentialsRepository.findByUserId(1L)).thenReturn(Mono.just(credentials));
+        when(passwordEncoderPort.matches(wrongPassword, hashedPassword)).thenReturn(false);
 
         // When & Then
         StepVerifier.create(authenticateUserUseCase.authenticate(email, wrongPassword))

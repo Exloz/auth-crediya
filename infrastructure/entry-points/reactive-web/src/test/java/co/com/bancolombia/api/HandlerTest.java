@@ -96,7 +96,7 @@ class HandlerTest {
             .thenReturn(Mono.just(validUserRequest));
         when(validator.validate(validUserRequest)).thenReturn(Set.of());
         when(userMapper.toModel(validUserRequest)).thenReturn(domainUser);
-        when(userUseCasePort.createUser(domainUser)).thenReturn(Mono.just(domainUser));
+        when(userUseCasePort.createUser(domainUser, validUserRequest.password())).thenReturn(Mono.just(domainUser));
         when(userMapper.toResponse(domainUser)).thenReturn(userResponse);
 
         // When
@@ -144,7 +144,7 @@ class HandlerTest {
             .thenReturn(Mono.just(validUserRequest));
         when(validator.validate(validUserRequest)).thenReturn(Set.of());
         when(userMapper.toModel(validUserRequest)).thenReturn(domainUser);
-        when(userUseCasePort.createUser(domainUser))
+        when(userUseCasePort.createUser(domainUser, validUserRequest.password()))
             .thenReturn(Mono.error(businessException));
 
         // When
