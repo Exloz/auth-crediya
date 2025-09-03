@@ -149,88 +149,88 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         };
     }
 
-    public static Mono<ServerResponse> handleException(Throwable throwable) {
-        return switch (throwable) {
-            case UserAlreadyExistsException ignored -> handleConflict(throwable.getMessage());
-            case ConstraintViolationException ignored -> handleBadRequest(throwable.getMessage());
-            case IllegalArgumentException ignored -> handleBadRequest(throwable.getMessage());
-            case InvalidCredentialsException ignored -> handleUnauthorized(throwable.getMessage());
-            case AuthenticationException ignored -> handleUnauthorized(AUTHENTICATION_FAILED_MSG);
-            case AccessDeniedException ignored -> handleForbidden(ACCESS_DENIED_MSG);
-            case WebExchangeBindException webExchangeBindException ->
-                    handleValidationException(webExchangeBindException);
-            default -> handleInternalServerError(throwable.getMessage());
-        };
-    }
-
-    private static Mono<ServerResponse> handleBadRequest(String message) {
-        Map<String, Object> error = new HashMap<>();
-        error.put(ERROR_FIELD, BAD_REQUEST_ERROR);
-        error.put(MESSAGE_FIELD, message);
-        error.put(STATUS_FIELD, HttpStatus.BAD_REQUEST.value());
-
-        return ServerResponse.status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(error);
-    }
-
-    private static Mono<ServerResponse> handleValidationException(WebExchangeBindException ex) {
-        Map<String, Object> errors = new HashMap<>();
-        errors.put(ERROR_FIELD, VALIDATION_ERROR);
-        errors.put(STATUS_FIELD, HttpStatus.BAD_REQUEST.value());
-
-        Map<String, String> fieldErrors = new HashMap<>();
-        ex.getFieldErrors().forEach(error ->
-            fieldErrors.put(error.getField(), error.getDefaultMessage()));
-
-        errors.put(FIELD_ERRORS_FIELD, fieldErrors);
-
-        return ServerResponse.status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(errors);
-    }
-
-    private static Mono<ServerResponse> handleConflict(String message) {
-        Map<String, Object> error = new HashMap<>();
-        error.put(ERROR_FIELD, CONFLICT_ERROR);
-        error.put(MESSAGE_FIELD, message);
-        error.put(STATUS_FIELD, HttpStatus.CONFLICT.value());
-
-        return ServerResponse.status(HttpStatus.CONFLICT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(error);
-    }
-
-    private static Mono<ServerResponse> handleInternalServerError(String message) {
-        Map<String, Object> error = new HashMap<>();
-        error.put(ERROR_FIELD, INTERNAL_SERVER_ERROR);
-        error.put(MESSAGE_FIELD, UNEXPECTED_ERROR_SHORT);
-        error.put(STATUS_FIELD, HttpStatus.INTERNAL_SERVER_ERROR.value());
-
-        return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(error);
-    }
-
-    private static Mono<ServerResponse> handleUnauthorized(String message) {
-        Map<String, Object> error = new HashMap<>();
-        error.put(ERROR_FIELD, UNAUTHORIZED_ERROR);
-        error.put(MESSAGE_FIELD, message);
-        error.put(STATUS_FIELD, HttpStatus.UNAUTHORIZED.value());
-
-        return ServerResponse.status(HttpStatus.UNAUTHORIZED)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(error);
-    }
-
-    private static Mono<ServerResponse> handleForbidden(String message) {
-        Map<String, Object> error = new HashMap<>();
-        error.put(ERROR_FIELD, FORBIDDEN_ERROR);
-        error.put(MESSAGE_FIELD, message);
-        error.put(STATUS_FIELD, HttpStatus.FORBIDDEN.value());
-
-        return ServerResponse.status(HttpStatus.FORBIDDEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(error);
-    }
+//    public static Mono<ServerResponse> handleException(Throwable throwable) {
+//        return switch (throwable) {
+//            case UserAlreadyExistsException ignored -> handleConflict(throwable.getMessage());
+//            case ConstraintViolationException ignored -> handleBadRequest(throwable.getMessage());
+//            case IllegalArgumentException ignored -> handleBadRequest(throwable.getMessage());
+//            case InvalidCredentialsException ignored -> handleUnauthorized(throwable.getMessage());
+//            case AuthenticationException ignored -> handleUnauthorized(AUTHENTICATION_FAILED_MSG);
+//            case AccessDeniedException ignored -> handleForbidden(ACCESS_DENIED_MSG);
+//            case WebExchangeBindException webExchangeBindException ->
+//                    handleValidationException(webExchangeBindException);
+//            default -> handleInternalServerError(throwable.getMessage());
+//        };
+//    }
+//
+//    private static Mono<ServerResponse> handleBadRequest(String message) {
+//        Map<String, Object> error = new HashMap<>();
+//        error.put(ERROR_FIELD, BAD_REQUEST_ERROR);
+//        error.put(MESSAGE_FIELD, message);
+//        error.put(STATUS_FIELD, HttpStatus.BAD_REQUEST.value());
+//
+//        return ServerResponse.status(HttpStatus.BAD_REQUEST)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(error);
+//    }
+//
+//    private static Mono<ServerResponse> handleValidationException(WebExchangeBindException ex) {
+//        Map<String, Object> errors = new HashMap<>();
+//        errors.put(ERROR_FIELD, VALIDATION_ERROR);
+//        errors.put(STATUS_FIELD, HttpStatus.BAD_REQUEST.value());
+//
+//        Map<String, String> fieldErrors = new HashMap<>();
+//        ex.getFieldErrors().forEach(error ->
+//            fieldErrors.put(error.getField(), error.getDefaultMessage()));
+//
+//        errors.put(FIELD_ERRORS_FIELD, fieldErrors);
+//
+//        return ServerResponse.status(HttpStatus.BAD_REQUEST)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(errors);
+//    }
+//
+//    private static Mono<ServerResponse> handleConflict(String message) {
+//        Map<String, Object> error = new HashMap<>();
+//        error.put(ERROR_FIELD, CONFLICT_ERROR);
+//        error.put(MESSAGE_FIELD, message);
+//        error.put(STATUS_FIELD, HttpStatus.CONFLICT.value());
+//
+//        return ServerResponse.status(HttpStatus.CONFLICT)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(error);
+//    }
+//
+//    private static Mono<ServerResponse> handleInternalServerError(String message) {
+//        Map<String, Object> error = new HashMap<>();
+//        error.put(ERROR_FIELD, INTERNAL_SERVER_ERROR);
+//        error.put(MESSAGE_FIELD, UNEXPECTED_ERROR_SHORT);
+//        error.put(STATUS_FIELD, HttpStatus.INTERNAL_SERVER_ERROR.value());
+//
+//        return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(error);
+//    }
+//
+//    private static Mono<ServerResponse> handleUnauthorized(String message) {
+//        Map<String, Object> error = new HashMap<>();
+//        error.put(ERROR_FIELD, UNAUTHORIZED_ERROR);
+//        error.put(MESSAGE_FIELD, message);
+//        error.put(STATUS_FIELD, HttpStatus.UNAUTHORIZED.value());
+//
+//        return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(error);
+//    }
+//
+//    private static Mono<ServerResponse> handleForbidden(String message) {
+//        Map<String, Object> error = new HashMap<>();
+//        error.put(ERROR_FIELD, FORBIDDEN_ERROR);
+//        error.put(MESSAGE_FIELD, message);
+//        error.put(STATUS_FIELD, HttpStatus.FORBIDDEN.value());
+//
+//        return ServerResponse.status(HttpStatus.FORBIDDEN)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(error);
+//    }
 }

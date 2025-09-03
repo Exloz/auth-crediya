@@ -18,12 +18,14 @@ public record UserRegisterReq(
         String lastName,
 
         @Schema(description = "Date of birth", example = "1990-01-15")
+        @NotBlank(message = ValidationMessages.BIRTH_DATE_REQUIRED)
         LocalDate birthDate,
 
         @Schema(description = "Residential address", example = "Calle 123 #45-67")
         String address,
 
         @Schema(description = "Identity document number", example = "12345678")
+        @NotBlank(message = ValidationMessages.ID_DOCUMENT_REQUIRED)
         String idDocument,
 
         @Schema(description = "Email address", example = "juan.perez@email.com")
@@ -34,9 +36,11 @@ public record UserRegisterReq(
         @Schema(description = "Monthly base salary", example = "2500000.00")
         @DecimalMin(value = "0.0", inclusive = false, message = ValidationMessages.BASE_SALARY_MIN_VALUE)
         @DecimalMax(value = "15000000.0", message = ValidationMessages.BASE_SALARY_MAX_VALUE)
+        @NotNull(message = ValidationMessages.BASE_SALARY_REQUIRED)
         BigDecimal baseSalary,
 
         @Schema(description = "Phone number", example = "+57 300 123 4567")
+        @NotBlank(message = ValidationMessages.PHONE_REQUIRED)
         String phoneNumber,
 
         @Schema(description = "User password", example = "securePassword123")

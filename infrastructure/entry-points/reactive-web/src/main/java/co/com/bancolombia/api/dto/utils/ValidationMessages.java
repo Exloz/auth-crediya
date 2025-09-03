@@ -11,7 +11,6 @@ public final class ValidationMessages {
     public static final String EMAIL_REQUIRED = "Email is required and cannot be blank";
     public static final String ID_DOCUMENT_REQUIRED = "Document id is required and cannot be blank";
     public static final String PHONE_REQUIRED = "Phone number is required and cannot be blank";
-    public static final String ROLE_REQUIRED = "Role is required and cannot be blank";
     public static final String BIRTH_DATE_REQUIRED = "Birth date is required";
     public static final String BASE_SALARY_REQUIRED = "Base salary is required";
 
