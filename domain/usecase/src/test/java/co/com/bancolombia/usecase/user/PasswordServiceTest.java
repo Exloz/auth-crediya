@@ -39,7 +39,6 @@ class PasswordEncoderPortTest {
         // Given
         String rawPassword = "testPassword123";
         String encodedPassword = "$2a$10$encodedPassword";
-        when(passwordEncoderPort.encodePassword(rawPassword)).thenReturn(encodedPassword);
         when(passwordEncoderPort.matches(rawPassword, encodedPassword)).thenReturn(true);
 
         // When & Then
@@ -52,7 +51,6 @@ class PasswordEncoderPortTest {
         String rawPassword = "testPassword123";
         String wrongPassword = "wrongPassword";
         String encodedPassword = "$2a$10$encodedPassword";
-        when(passwordEncoderPort.encodePassword(rawPassword)).thenReturn(encodedPassword);
         when(passwordEncoderPort.matches(wrongPassword, encodedPassword)).thenReturn(false);
 
         // When & Then
@@ -63,7 +61,6 @@ class PasswordEncoderPortTest {
     void shouldNotMatchNullPasswords() {
         // Given
         String encodedPassword = "$2a$10$encodedPassword";
-        when(passwordEncoderPort.encodePassword("test")).thenReturn(encodedPassword);
         when(passwordEncoderPort.matches(null, encodedPassword)).thenReturn(false);
         when(passwordEncoderPort.matches("test", null)).thenReturn(false);
 

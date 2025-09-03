@@ -5,5 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface UserUseCasePort {
     Mono<User> createUser(User user, String rawPassword);
-    Mono<User> getUserByIdDocument(String idDocument);
+    Mono<User> getUserById(String idDocument);
 }

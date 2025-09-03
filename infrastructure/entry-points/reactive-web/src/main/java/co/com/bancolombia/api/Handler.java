@@ -2,7 +2,6 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.usecase.auth.TokenServicePort;
 import co.com.bancolombia.api.dto.register.UserRegisterReq;
-import co.com.bancolombia.api.dto.user.UserInfoRes;
 import co.com.bancolombia.api.mapper.UserMapper;
 import co.com.bancolombia.api.dto.login.LoginReq;
 import co.com.bancolombia.api.dto.login.LoginRes;
@@ -98,10 +97,10 @@ public class Handler {
         return Mono.just(request);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
-    public Mono<ServerResponse> listenGetUserByIdDocument(ServerRequest request) {
-        String idDocument = request.pathVariable("idDocument");
-        return useCase.getUserByIdDocument(idDocument)
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR') or hasRole('USER')")
+    public Mono<ServerResponse> listenGetUserById(ServerRequest request) {
+        String userId = request.pathVariable("userId");
+        return useCase.getUserById(userId)
                 .map(mapper::toUserInfoResponse)
                 .flatMap(userInfo -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)

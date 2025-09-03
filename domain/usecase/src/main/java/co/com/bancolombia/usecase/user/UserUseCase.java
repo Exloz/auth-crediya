@@ -33,8 +33,8 @@ public class UserUseCase implements UserUseCasePort {
     }
 
     @Override
-    public Mono<User> getUserByIdDocument(String idDocument) {
-        return userRepository.findByIdDocument(idDocument);
+    public Mono<User> getUserById(String idDocument) {
+        return userRepository.findByUserId(idDocument);
     }
 
     private RoleId inferRoleFromBusinessRules(User user) {

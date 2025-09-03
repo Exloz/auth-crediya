@@ -64,13 +64,13 @@ public class RouterRest {
                                  @ApiResponse(responseCode = "500", description = "Internal server error")
                              })
              ),
-             @RouterOperation( path = "/api/v1/usuarios/{idDocument}",
+             @RouterOperation( path = "/api/v1/usuarios/{userId}",
                      produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGetUserByIdDocument",
-                     operation = @Operation( operationId = "getUserByIdDocument",
-                             summary = "Get user information by document ID",
-                             description = "Retrieves complete user information by document number. Requires ADMIN or ASESOR role.",
+                     operation = @Operation( operationId = "getUserById",
+                             summary = "Get user information by ID",
+                             description = "Retrieves complete user information by ID number. Requires ADMIN or ASESOR role.",
                              parameters = {
-                                 @Parameter(name = "idDocument", description = "User's document ID number", required = true, example = "1234567890")
+                                 @Parameter(name = "userId", description = "User's ID number", required = true, example = "1234567890")
                              },
                              responses = {
                                  @ApiResponse(responseCode = "200", description = "User information retrieved successfully",
@@ -83,6 +83,6 @@ public class RouterRest {
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/usuarios"), handler::listenCreateUser)
                 .andRoute(POST("/api/v1/login"), handler::listenLogin)
-                .andRoute(GET("/api/v1/usuarios/{idDocument}"), handler::listenGetUserByIdDocument);
+                .andRoute(GET("/api/v1/usuarios/{userId}"), handler::listenGetUserById);
     }
 }
