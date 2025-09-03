@@ -56,9 +56,9 @@ public class JwtAdapter implements TokenServicePort {
         String resourcePath = path.startsWith("classpath:") ? path.substring(10) : path;
         ClassPathResource resource = new ClassPathResource(resourcePath);
         String keyContent = new String(resource.getInputStream().readAllBytes())
-                .replace("\\n", "")
-                .replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "");
+                .replaceAll("\\s+", "")
+                .replace("-----BEGINPRIVATEKEY-----", "")
+                .replace("-----ENDPRIVATEKEY-----", "");
 
         byte[] keyBytes = Base64.getDecoder().decode(keyContent);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
@@ -70,9 +70,9 @@ public class JwtAdapter implements TokenServicePort {
         String resourcePath = path.startsWith("classpath:") ? path.substring(10) : path;
         ClassPathResource resource = new ClassPathResource(resourcePath);
         String keyContent = new String(resource.getInputStream().readAllBytes())
-                .replace("\\n", "")
-                .replace("-----BEGIN PUBLIC KEY-----", "")
-                .replace("-----END PUBLIC KEY-----", "");
+                .replaceAll("\\s+", "")
+                .replace("-----BEGINPUBLICKEY-----", "")
+                .replace("-----ENDPUBLICKEY-----", "");
 
         byte[] keyBytes = Base64.getDecoder().decode(keyContent);
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
