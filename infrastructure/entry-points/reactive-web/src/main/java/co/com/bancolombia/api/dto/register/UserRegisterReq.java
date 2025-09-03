@@ -18,7 +18,8 @@ public record UserRegisterReq(
         String lastName,
 
         @Schema(description = "Date of birth", example = "1990-01-15")
-        @NotBlank(message = ValidationMessages.BIRTH_DATE_REQUIRED)
+        @NotNull(message = ValidationMessages.BIRTH_DATE_REQUIRED)
+        @Past
         LocalDate birthDate,
 
         @Schema(description = "Residential address", example = "Calle 123 #45-67")
