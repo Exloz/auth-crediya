@@ -1,5 +1,6 @@
-package co.com.bancolombia.api.config;
+package co.com.bancolombia.api.config.security;
 
+import co.com.bancolombia.api.config.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

@@ -1,7 +1,7 @@
 package co.com.bancolombia.api.mapper;
 
-import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.UserRegisterRes;
+import co.com.bancolombia.api.dto.register.UserRegisterReq;
+import co.com.bancolombia.api.dto.register.UserRegisterRes;
 import co.com.bancolombia.model.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,0 +1,15 @@
+dependencies {
+    implementation project(':usecase')
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework.security:spring-security-crypto'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    implementation 'org.springframework:spring-core'
+    implementation 'org.projectlombok:lombok'
+    implementation 'jakarta.annotation:jakarta.annotation-api'
+    implementation 'org.slf4j:slf4j-api'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+}

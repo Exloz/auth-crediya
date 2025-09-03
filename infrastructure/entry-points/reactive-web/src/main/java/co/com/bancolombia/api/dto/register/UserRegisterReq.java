@@ -1,5 +1,6 @@
-package co.com.bancolombia.api.dto;
+package co.com.bancolombia.api.dto.register;
 
+import co.com.bancolombia.api.dto.utils.ValidationMessages;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 

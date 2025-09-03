@@ -1,10 +1,10 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.config.JwtService;
-import co.com.bancolombia.api.dto.UserRegisterReq;
+import co.com.bancolombia.usecase.auth.TokenServicePort;
+import co.com.bancolombia.api.dto.register.UserRegisterReq;
 import co.com.bancolombia.api.mapper.UserMapper;
-import co.com.bancolombia.api.dto.LoginReq;
-import co.com.bancolombia.api.dto.LoginRes;
+import co.com.bancolombia.api.dto.login.LoginReq;
+import co.com.bancolombia.api.dto.login.LoginRes;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
 import co.com.bancolombia.usecase.auth.AuthenticateUserUseCasePort;
 import jakarta.validation.ConstraintViolation;
@@ -38,7 +38,7 @@ public class Handler {
     private final UserMapper mapper;
     private final Validator validator;
     private final AuthenticateUserUseCasePort authenticateUserUseCase;
-    private final JwtService jwtService;
+    private final TokenServicePort tokenServicePort;
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
@@ -80,7 +80,7 @@ public class Handler {
                 .flatMap(this::validateRequest)
                 .flatMap(req -> authenticateUserUseCase.authenticate(req.email(), req.password()))
                 .map(user -> {
-                    String token = jwtService.generateToken(user.getEmail(), user.getUserId(), user.getRoleId().name());
+                    String token = tokenServicePort.generateToken(user.getEmail(), user.getUserId(), user.getRoleId().name());
                     return new LoginRes(user.getUserId(), user.getEmail(), user.getRoleId(), token);
                 })
                 .flatMap(loginRes -> ServerResponse.ok()

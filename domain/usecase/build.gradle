@@ -1,3 +1,7 @@
 dependencies {
     implementation project(':model')
+
+    testImplementation 'org.springframework.security:spring-security-crypto'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
 }

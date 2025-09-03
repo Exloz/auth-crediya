@@ -1,12 +1,13 @@
-package co.com.bancolombia.api.config;
+package co.com.bancolombia.security.config;
 
-import io.jsonwebtoken.Claims;
+import co.com.bancolombia.usecase.auth.TokenServicePort;
+import java.util.Map;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -21,9 +22,9 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 
-@Service
+@Component
 @Slf4j
-public class JwtService {
+public class JwtAdapter implements TokenServicePort {
 
     @Value("${jwt.issuer}")
     private String jwtIssuer;
@@ -82,23 +83,24 @@ public class JwtService {
         return keyFactory.generatePublic(keySpec);
     }
 
+    @Override
     public String generateToken(String email, Long userId, String role) {
         return Jwts.builder()
-                .subject(email)
+                .setSubject(email)
                 .claim("userId", userId)
                 .claim("role", role)
-                .issuer(jwtIssuer)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiry))
+                .setIssuer(jwtIssuer)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiry))
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
     }
 
-    public Claims validateToken(String token) {
+    @Override
+    public Map<String, Object> validateToken(String token) {
         return Jwts.parser()
-                .verifyWith(publicKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                .setSigningKey(publicKey)
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

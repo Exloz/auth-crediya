@@ -1,9 +1,9 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.UserRegisterRes;
-import co.com.bancolombia.api.dto.LoginReq;
-import co.com.bancolombia.api.dto.LoginRes;
+import co.com.bancolombia.api.dto.register.UserRegisterReq;
+import co.com.bancolombia.api.dto.register.UserRegisterRes;
+import co.com.bancolombia.api.dto.login.LoginReq;
+import co.com.bancolombia.api.dto.login.LoginRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

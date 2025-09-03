@@ -1,8 +1,8 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.config.JwtService;
-import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.UserRegisterRes;
+import co.com.bancolombia.usecase.auth.TokenServicePort;
+import co.com.bancolombia.api.dto.register.UserRegisterReq;
+import co.com.bancolombia.api.dto.register.UserRegisterRes;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
 import co.com.bancolombia.api.mapper.UserMapper;
@@ -17,7 +17,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
@@ -49,14 +48,14 @@ class HandlerTest {
     private Validator validator;
 
     @Mock
-    private JwtService jwtService;
+    private TokenServicePort tokenServicePort;
 
     private UserRegisterReq validUserRequest;
     private UserRegisterRes userResponse;
 
     @BeforeEach
     void setUp() {
-        handler = new Handler(userUseCasePort, userMapper, validator, authenticateUserUseCasePort, jwtService);
+        handler = new Handler(userUseCasePort, userMapper, validator, authenticateUserUseCasePort, tokenServicePort);
 
         validUserRequest = new UserRegisterReq(
             "Juan",

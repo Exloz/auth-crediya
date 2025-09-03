@@ -35,7 +35,7 @@ class AuthenticateUserUseCaseTest {
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
-        passwordEncoderPort = new co.com.bancolombia.api.config.BCryptPasswordEncoderService(passwordEncoder);
+        passwordEncoderPort = new co.com.bancolombia.security.config.BCryptPasswordEncoderAdapter(passwordEncoder);
         authenticateUserUseCase = new AuthenticateUserUseCase(
             userRepository,
             credentialsRepository,

@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.config;
+package co.com.bancolombia.api.config.security;
 
 import co.com.bancolombia.usecase.user.PasswordEncoderPort;
 import lombok.RequiredArgsConstructor;

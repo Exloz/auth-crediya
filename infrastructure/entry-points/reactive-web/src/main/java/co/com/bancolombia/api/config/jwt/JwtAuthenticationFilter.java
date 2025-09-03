@@ -1,6 +1,6 @@
-package co.com.bancolombia.api.config;
+package co.com.bancolombia.api.config.jwt;
 
-import io.jsonwebtoken.Claims;
+import co.com.bancolombia.usecase.auth.TokenServicePort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,15 +15,16 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
 public class JwtAuthenticationFilter implements WebFilter {
 
-    private final JwtService jwtService;
+    private final TokenServicePort tokenServicePort;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
+    public JwtAuthenticationFilter(TokenServicePort tokenServicePort) {
+        this.tokenServicePort = tokenServicePort;
     }
 
     @Override
@@ -32,10 +33,10 @@ public class JwtAuthenticationFilter implements WebFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
-                Claims claims = jwtService.validateToken(token);
-                String email = claims.getSubject();
-                String role = claims.get("role", String.class);
-                Long userId = claims.get("userId", Long.class);
+                Map<String, Object> claims = tokenServicePort.validateToken(token);
+                String email = (String) claims.get("sub");
+                String role = (String) claims.get("role");
+                Long userId = ((Number) claims.get("userId")).longValue();
 
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         email, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))

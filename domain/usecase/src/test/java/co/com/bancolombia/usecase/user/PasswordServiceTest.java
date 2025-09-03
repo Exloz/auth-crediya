@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PasswordEncoderPortTest {
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    private final PasswordEncoderPort passwordEncoderPort = new co.com.bancolombia.api.config.BCryptPasswordEncoderService(passwordEncoder);
+    private final PasswordEncoderPort passwordEncoderPort = new co.com.bancolombia.security.config.BCryptPasswordEncoderAdapter(passwordEncoder);
 
     @Test
     void shouldEncodePassword() {
