@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -54,11 +53,10 @@ public class JwtAdapter implements TokenServicePort {
     }
 
     private PrivateKey loadPrivateKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        // Remove classpath: prefix if present
         String resourcePath = path.startsWith("classpath:") ? path.substring(10) : path;
         ClassPathResource resource = new ClassPathResource(resourcePath);
         String keyContent = new String(resource.getInputStream().readAllBytes())
-                .replaceAll("\\n", "")
+                .replace("\\n", "")
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "");
 
@@ -69,11 +67,10 @@ public class JwtAdapter implements TokenServicePort {
     }
 
     private PublicKey loadPublicKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        // Remove classpath: prefix if present
         String resourcePath = path.startsWith("classpath:") ? path.substring(10) : path;
         ClassPathResource resource = new ClassPathResource(resourcePath);
         String keyContent = new String(resource.getInputStream().readAllBytes())
-                .replaceAll("\\n", "")
+                .replace("\\n", "")
                 .replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "");
 
@@ -98,8 +95,9 @@ public class JwtAdapter implements TokenServicePort {
 
     @Override
     public Map<String, Object> validateToken(String token) {
-        return Jwts.parser()
+        return Jwts.parserBuilder()
                 .setSigningKey(publicKey)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
