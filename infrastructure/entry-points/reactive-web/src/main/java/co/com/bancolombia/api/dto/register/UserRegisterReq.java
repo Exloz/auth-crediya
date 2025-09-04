@@ -49,7 +49,7 @@ public record UserRegisterReq(
         @Size(min = 8, message = "Password must be at least 8 characters long")
         String password,
 
-        @Schema(description = "Role to assign (optional)", example = "USER", allowableValues = {"USER", "ADMIN", "ASESOR"})
+        @Schema(description = "Role to assign (optional)", example = "USER", allowableValues = {"USER", "ADMIN", "ADVISOR"})
         String role
 ) {
 }

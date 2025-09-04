@@ -12,7 +12,7 @@ class RoleIdTest {
         assertEquals(3, RoleId.values().length);
         assertTrue(RoleId.valueOf("USER") instanceof RoleId);
         assertTrue(RoleId.valueOf("ADMIN") instanceof RoleId);
-        assertTrue(RoleId.valueOf("ASESOR") instanceof RoleId);
+        assertTrue(RoleId.valueOf("ADVISOR") instanceof RoleId);
     }
 
     @Test
@@ -20,7 +20,7 @@ class RoleIdTest {
         // When & Then
         assertEquals(RoleId.USER, RoleId.valueOf("USER"));
         assertEquals(RoleId.ADMIN, RoleId.valueOf("ADMIN"));
-        assertEquals(RoleId.ADVISOR, RoleId.valueOf("ASESOR"));
+        assertEquals(RoleId.ADVISOR, RoleId.valueOf("ADVISOR"));
     }
 
     @Test
@@ -34,7 +34,7 @@ class RoleIdTest {
         // When & Then
         assertEquals("USER", RoleId.USER.name());
         assertEquals("ADMIN", RoleId.ADMIN.name());
-        assertEquals("ASESOR", RoleId.ADVISOR.name());
+        assertEquals("ADVISOR", RoleId.ADVISOR.name());
     }
 
     @Test

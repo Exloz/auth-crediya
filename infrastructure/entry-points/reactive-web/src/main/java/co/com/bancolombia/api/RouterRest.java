@@ -32,7 +32,7 @@ public class RouterRest {
                     produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenCreateUser",
                     operation = @Operation( operationId = "createUser",
                             summary = "Register user",
-                            description = "Registers a new user. Role is optional and validated in the use case. If a valid role is provided (USER, ADMIN, ASESOR), it will be applied. If omitted or blank, the role is inferred by business rules: emails ending with @crediya.com become ADMIN; otherwise USER.",
+                            description = "Registers a new user. Role is optional and validated in the use case. If a valid role is provided (USER, ADMIN, ADVISOR), it will be applied. If omitted or blank, the role is inferred by business rules: emails ending with @crediya.com become ADMIN; otherwise USER.",
                             requestBody = @RequestBody(
                                 description = "Data of the client to register",
                                 required = true,
@@ -68,7 +68,7 @@ public class RouterRest {
                      produces = { MediaType.APPLICATION_JSON_VALUE }, method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGetUserByIdDocument",
                      operation = @Operation( operationId = "getUserById",
                              summary = "Get user information by ID",
-                             description = "Retrieves complete user information by ID number. Requires ADMIN or ASESOR role.",
+                             description = "Retrieves complete user information by ID number. Requires ADMIN or ADVISOR role.",
                              parameters = {
                                  @Parameter(name = "userId", description = "User's ID number", required = true, example = "1234567890")
                              },

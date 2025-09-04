@@ -40,7 +40,7 @@ public class Handler {
     private final AuthenticateUserUseCasePort authenticateUserUseCase;
     private final TokenServicePort tokenServicePort;
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ADVISOR')")
     public Mono<ServerResponse> listenCreateUser(ServerRequest request) {
         return request.bodyToMono(UserRegisterReq.class)
                 .doOnNext(req -> log.info(RECEIVED_USER_REGISTRATION_REQUEST, req))
@@ -97,7 +97,7 @@ public class Handler {
         return Mono.just(request);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ADVISOR') or hasRole('USER')")
     public Mono<ServerResponse> listenGetUserById(ServerRequest request) {
         String userId = request.pathVariable("userId");
         return useCase.getUserById(userId)
