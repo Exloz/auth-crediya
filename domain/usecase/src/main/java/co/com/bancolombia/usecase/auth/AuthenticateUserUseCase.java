@@ -5,7 +5,7 @@ import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.exception.InvalidCredentialsException;
 import co.com.bancolombia.model.user.gateways.CredentialsRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
-import co.com.bancolombia.usecase.user.PasswordEncoderPort;
+import co.com.bancolombia.usecase.portUtils.PasswordEncoderPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 

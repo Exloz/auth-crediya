@@ -1,4 +1,4 @@
-package co.com.bancolombia.usecase.user;
+package co.com.bancolombia.usecase.portUtils;
 
 public interface PasswordEncoderPort {
 

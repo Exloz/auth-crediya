@@ -20,7 +20,7 @@ class RoleIdTest {
         // When & Then
         assertEquals(RoleId.USER, RoleId.valueOf("USER"));
         assertEquals(RoleId.ADMIN, RoleId.valueOf("ADMIN"));
-        assertEquals(RoleId.ASESOR, RoleId.valueOf("ASESOR"));
+        assertEquals(RoleId.ADVISOR, RoleId.valueOf("ASESOR"));
     }
 
     @Test
@@ -34,7 +34,7 @@ class RoleIdTest {
         // When & Then
         assertEquals("USER", RoleId.USER.name());
         assertEquals("ADMIN", RoleId.ADMIN.name());
-        assertEquals("ASESOR", RoleId.ASESOR.name());
+        assertEquals("ASESOR", RoleId.ADVISOR.name());
     }
 
     @Test
@@ -42,7 +42,7 @@ class RoleIdTest {
         // When & Then
         assertEquals(0, RoleId.USER.ordinal());
         assertEquals(1, RoleId.ADMIN.ordinal());
-        assertEquals(2, RoleId.ASESOR.ordinal());
+        assertEquals(2, RoleId.ADVISOR.ordinal());
     }
 
     @Test
@@ -50,14 +50,14 @@ class RoleIdTest {
         // When & Then
         assertEquals(RoleId.USER, RoleId.USER);
         assertEquals(RoleId.ADMIN, RoleId.ADMIN);
-        assertEquals(RoleId.ASESOR, RoleId.ASESOR);
+        assertEquals(RoleId.ADVISOR, RoleId.ADVISOR);
     }
 
     @Test
     void shouldNotBeEqualToDifferentValues() {
         // When & Then
         assertNotEquals(RoleId.USER, RoleId.ADMIN);
-        assertNotEquals(RoleId.USER, RoleId.ASESOR);
-        assertNotEquals(RoleId.ADMIN, RoleId.ASESOR);
+        assertNotEquals(RoleId.USER, RoleId.ADVISOR);
+        assertNotEquals(RoleId.ADMIN, RoleId.ADVISOR);
     }
 }

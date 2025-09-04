@@ -6,6 +6,7 @@ import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.exception.UserAlreadyExistsException;
 import co.com.bancolombia.model.user.gateways.CredentialsRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.usecase.portUtils.PasswordEncoderPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

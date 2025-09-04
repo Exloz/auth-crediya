@@ -5,12 +5,11 @@ import co.com.bancolombia.model.user.RoleId;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.CredentialsRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
-import co.com.bancolombia.usecase.user.PasswordEncoderPort;
+import co.com.bancolombia.usecase.portUtils.PasswordEncoderPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 

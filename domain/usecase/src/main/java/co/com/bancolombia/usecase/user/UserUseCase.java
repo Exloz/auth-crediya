@@ -5,6 +5,7 @@ import co.com.bancolombia.model.user.RoleId;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.CredentialsRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.usecase.portUtils.PasswordEncoderPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -42,8 +43,8 @@ public class UserUseCase implements UserUseCasePort {
         if (user.getRoleId() == RoleId.ADMIN && email != null && email.toLowerCase().endsWith("@crediya.com")) {
             return RoleId.ADMIN;
         }
-        if (user.getRoleId() == RoleId.ASESOR && email != null && email.toLowerCase().endsWith("@crediya.com")) {
-            return RoleId.ASESOR;
+        if (user.getRoleId() == RoleId.ADVISOR && email != null && email.toLowerCase().endsWith("@crediya.com")) {
+            return RoleId.ADVISOR;
         }
         return RoleId.USER;
     }
