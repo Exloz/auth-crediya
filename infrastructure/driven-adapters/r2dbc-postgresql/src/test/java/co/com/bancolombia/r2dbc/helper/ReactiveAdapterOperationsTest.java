@@ -99,8 +99,8 @@ class ReactiveAdapterOperationsTest {
     }
 
     static class DummyEntity {
-        private String id;
-        private String name;
+        private final String id;
+        private final String name;
 
         public DummyEntity(String id, String name) {
             this.id = id;
@@ -134,8 +134,8 @@ class ReactiveAdapterOperationsTest {
     }
 
     static class DummyData {
-        private String id;
-        private String name;
+        private final String id;
+        private final String name;
 
         public DummyData(String id, String name) {
             this.id = id;

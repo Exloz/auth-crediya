@@ -57,4 +57,16 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<User,
                 .flatMap(entity -> Mono.error(new UserAlreadyExistsException(USER_WITH_EMAIL_EXISTS + user.getEmail() + ALREADY_EXISTS_SUFFIX)))
                 .then();
     }
+
+    @Override
+    public Mono<User> findByEmail(String email) {
+        return repository.findByEmail(email)
+                .map(this::toEntity);
+    }
+
+    @Override
+    public Mono<User> findByUserId(String userId) {
+        return repository.findByUserId(userId)
+                .map(this::toEntity);
+    }
 }

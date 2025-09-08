@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.dto;
+package co.com.bancolombia.api.dto.utils;
 
 public final class ValidationMessages {
 
@@ -9,6 +9,8 @@ public final class ValidationMessages {
     public static final String NAME_REQUIRED = "Name is required and cannot be blank";
     public static final String LASTNAME_REQUIRED = "Lastname is required and cannot be blank";
     public static final String EMAIL_REQUIRED = "Email is required and cannot be blank";
+    public static final String ID_DOCUMENT_REQUIRED = "Document id is required and cannot be blank";
+    public static final String PHONE_REQUIRED = "Phone number is required and cannot be blank";
     public static final String BIRTH_DATE_REQUIRED = "Birth date is required";
     public static final String BASE_SALARY_REQUIRED = "Base salary is required";
 

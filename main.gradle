@@ -58,7 +58,7 @@ subprojects {
         targetClasses = ['co.com.bancolombia.*']
         excludedClasses = []
         excludedTestClasses = []
-        pitestVersion = '1.16.1'
+        pitestVersion = '1.17.1'
         verbose = false
         outputFormats = ['XML', 'HTML']
         threads = 8

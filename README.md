@@ -21,6 +21,33 @@ docker-compose up -d
 
 La aplicación estará disponible en `http://localhost:8080`
 
+## 🔐 Configuración JWT
+
+El servicio utiliza JWT con algoritmo RS256 para mayor seguridad:
+
+### Generación de Claves RSA
+```bash
+# Crear directorio de claves
+mkdir -p applications/app-service/src/main/resources/keys
+
+# Generar clave privada
+openssl genrsa -out applications/app-service/src/main/resources/keys/private.pem 2048
+
+# Extraer clave pública
+openssl rsa -in applications/app-service/src/main/resources/keys/private.pem -pubout -out applications/app-service/src/main/resources/keys/public.pem
+```
+
+### Variables de Entorno
+```bash
+# JWT Configuration
+JWT_ISSUER=auth-crediya
+JWT_EXPIRY=3600000
+JWT_PRIVATE_KEY_PATH=src/main/resources/keys/private.pem
+JWT_PUBLIC_KEY_PATH=src/main/resources/keys/public.pem
+```
+
+⚠️ **Importante:** La clave privada (`private.pem`) está excluida del repositorio por seguridad. Cada entorno debe generar sus propias claves.
+
 ## 📋 API
 
 ### Registrar Usuario

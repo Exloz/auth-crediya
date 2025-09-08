@@ -3,8 +3,8 @@ package co.com.bancolombia.api;
 import co.com.bancolombia.api.config.GlobalExceptionHandler;
 import co.com.bancolombia.api.config.OpenApiConfig;
 import co.com.bancolombia.api.config.ValidationConfig;
-import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.UserRegisterRes;
+import co.com.bancolombia.api.dto.register.UserRegisterReq;
+import co.com.bancolombia.api.dto.register.UserRegisterRes;
 import co.com.bancolombia.api.mapper.UserMapper;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.exception.UserAlreadyExistsException;
@@ -55,7 +55,9 @@ class RouterRestTest {
             "12345678",
             "juan.perez@email.com",
             new BigDecimal("2500000.00"),
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            "securePassword123",
+            null // role omitted -> defaults to USER
         );
 
         userResponse = new UserRegisterRes(
@@ -81,7 +83,7 @@ class RouterRestTest {
             .build();
         Mockito.when(userMapper.toModel(any(UserRegisterReq.class)))
             .thenReturn(domainUser);
-        Mockito.when(userUseCasePort.createUser(any()))
+        Mockito.when(userUseCasePort.createUser(any(User.class), any(String.class)))
             .thenReturn(Mono.just(domainUser));
         Mockito.when(userMapper.toResponse(any()))
             .thenReturn(userResponse);
@@ -114,7 +116,9 @@ class RouterRestTest {
             "12345678",
             "invalid-email", // Invalid email
             new BigDecimal("2500000.00"),
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            "securePassword123",
+            null
         );
 
         // When & Then
@@ -138,7 +142,9 @@ class RouterRestTest {
             "12345678",
             "juan.perez@email.com",
             null, // Null baseSalary
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            "securePassword123",
+            null
         );
 
         // When & Then
@@ -162,7 +168,9 @@ class RouterRestTest {
             "12345678",
             "juan.perez@email.com",
             new BigDecimal("20000000.00"), // Salary too high (> 15,000,000)
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            "securePassword123",
+            null
         );
 
         // When & Then
@@ -186,7 +194,7 @@ class RouterRestTest {
             .build();
         Mockito.when(userMapper.toModel(any(UserRegisterReq.class)))
             .thenReturn(domainUser);
-        Mockito.when(userUseCasePort.createUser(any()))
+        Mockito.when(userUseCasePort.createUser(any(User.class), any(String.class)))
             .thenReturn(Mono.error(new UserAlreadyExistsException("User with email juan.perez@email.com already exists")));
 
         // When & Then

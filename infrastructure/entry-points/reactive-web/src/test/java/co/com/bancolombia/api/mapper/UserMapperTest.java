@@ -1,7 +1,7 @@
 package co.com.bancolombia.api.mapper;
 
-import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.UserRegisterRes;
+import co.com.bancolombia.api.dto.register.UserRegisterReq;
+import co.com.bancolombia.api.dto.register.UserRegisterRes;
 import co.com.bancolombia.model.user.RoleId;
 import co.com.bancolombia.model.user.User;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,9 @@ class UserMapperTest {
                 "12345678",
                 "john.doe@example.com",
                 BigDecimal.valueOf(1000000),
-                "3001234567"
+                "3001234567",
+                "securePassword123",
+                "USER"
         );
 
         // When
@@ -44,7 +46,7 @@ class UserMapperTest {
         assertThat(user.getAddress()).isEqualTo("Calle 123");
         assertThat(user.getBirthDate()).isEqualTo(request.birthDate());
         assertThat(user.getBaseSalary()).isEqualTo(BigDecimal.valueOf(1000000));
-        assertThat(user.getRoleId()).isEqualTo(RoleId.USER); // This is the key assertion
+        assertThat(user.getRoleId()).isEqualTo(RoleId.USER);
         assertThat(user.getUserId()).isNull(); // Should be ignored
     }
 

@@ -1,29 +1,51 @@
 package co.com.bancolombia.usecase.user;
 
+import co.com.bancolombia.model.user.Credentials;
 import co.com.bancolombia.model.user.RoleId;
 import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.model.user.gateways.CredentialsRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.usecase.portUtils.PasswordEncoderPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class UserUseCase implements UserUseCasePort {
-
-    private static final String ADMIN_EMAIL_DOMAIN = "@crediya.com";
-
     private final UserRepository userRepository;
+    private final CredentialsRepository credentialsRepository;
+    private final PasswordEncoderPort passwordEncoder;
 
-    public Mono<User> createUser(User user) {
-        checkEmailRole(user);
+    public Mono<User> createUser(User user, String rawPassword) {
+        if (user.getRoleId() == null) {
+            user.setRoleId(inferRoleFromBusinessRules(user));
+        }
+
         return userRepository.validateEmailNotExists(user)
-                .then(userRepository.saveUser(user));
+                .then(userRepository.saveUser(user))
+                .flatMap(savedUser -> {
+                    String hashedPassword = passwordEncoder.encodePassword(rawPassword);
+                    Credentials credentials = Credentials.builder()
+                            .userId(savedUser.getUserId())
+                            .password(hashedPassword)
+                            .build();
+                    return credentialsRepository.save(credentials)
+                            .thenReturn(savedUser);
+                });
     }
 
-    private static void checkEmailRole(User user) {
-        if (user.getEmail().contains(ADMIN_EMAIL_DOMAIN)) {
-            user.setRoleId(RoleId.ADMIN);
-        } else {
-            user.setRoleId(RoleId.USER);
+    @Override
+    public Mono<User> getUserById(String idDocument) {
+        return userRepository.findByUserId(idDocument);
+    }
+
+    private RoleId inferRoleFromBusinessRules(User user) {
+        String email = user.getEmail();
+        if (user.getRoleId() == RoleId.ADMIN && email != null && email.toLowerCase().endsWith("@crediya.com")) {
+            return RoleId.ADMIN;
         }
+        if (user.getRoleId() == RoleId.ADVISOR && email != null && email.toLowerCase().endsWith("@crediya.com")) {
+            return RoleId.ADVISOR;
+        }
+        return RoleId.USER;
     }
 }

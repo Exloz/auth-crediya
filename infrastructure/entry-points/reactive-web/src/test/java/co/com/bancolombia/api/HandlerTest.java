@@ -1,10 +1,12 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.dto.UserRegisterReq;
-import co.com.bancolombia.api.dto.UserRegisterRes;
+import co.com.bancolombia.usecase.auth.TokenServicePort;
+import co.com.bancolombia.api.dto.register.UserRegisterReq;
+import co.com.bancolombia.api.dto.register.UserRegisterRes;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
 import co.com.bancolombia.api.mapper.UserMapper;
+import co.com.bancolombia.usecase.auth.AuthenticateUserUseCasePort;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +17,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
@@ -41,14 +42,20 @@ class HandlerTest {
     private UserMapper userMapper;
 
     @Mock
+    private AuthenticateUserUseCasePort authenticateUserUseCasePort;
+
+    @Mock
     private Validator validator;
+
+    @Mock
+    private TokenServicePort tokenServicePort;
 
     private UserRegisterReq validUserRequest;
     private UserRegisterRes userResponse;
 
     @BeforeEach
     void setUp() {
-        handler = new Handler(userUseCasePort, userMapper, validator);
+        handler = new Handler(userUseCasePort, userMapper, validator, authenticateUserUseCasePort, tokenServicePort);
 
         validUserRequest = new UserRegisterReq(
             "Juan",
@@ -58,7 +65,9 @@ class HandlerTest {
             "12345678",
             "juan.perez@email.com",
             new BigDecimal("2500000.00"),
-            "+57 300 123 4567"
+            "+57 300 123 4567",
+            "securePassword123",
+            null
         );
 
         userResponse = new UserRegisterRes(
@@ -87,7 +96,7 @@ class HandlerTest {
             .thenReturn(Mono.just(validUserRequest));
         when(validator.validate(validUserRequest)).thenReturn(Set.of());
         when(userMapper.toModel(validUserRequest)).thenReturn(domainUser);
-        when(userUseCasePort.createUser(domainUser)).thenReturn(Mono.just(domainUser));
+        when(userUseCasePort.createUser(domainUser, validUserRequest.password())).thenReturn(Mono.just(domainUser));
         when(userMapper.toResponse(domainUser)).thenReturn(userResponse);
 
         // When
@@ -120,7 +129,7 @@ class HandlerTest {
 
         // Then
         StepVerifier.create(responseMono)
-            .expectError(IllegalArgumentException.class)
+            .expectError(jakarta.validation.ConstraintViolationException.class)
             .verify();
     }
 
@@ -135,7 +144,7 @@ class HandlerTest {
             .thenReturn(Mono.just(validUserRequest));
         when(validator.validate(validUserRequest)).thenReturn(Set.of());
         when(userMapper.toModel(validUserRequest)).thenReturn(domainUser);
-        when(userUseCasePort.createUser(domainUser))
+        when(userUseCasePort.createUser(domainUser, validUserRequest.password()))
             .thenReturn(Mono.error(businessException));
 
         // When

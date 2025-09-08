@@ -2,8 +2,8 @@ package co.com.bancolombia.api.config;
 
 import co.com.bancolombia.api.Handler;
 import co.com.bancolombia.api.RouterRest;
+import co.com.bancolombia.api.config.security.SecurityHeadersConfig;
 import co.com.bancolombia.api.mapper.UserMapper;
-import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.usecase.user.UserUseCasePort;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -17,8 +17,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.Mono;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class, ConfigTest.TestConfig.class})
 @WebFluxTest
