@@ -1,8 +1,8 @@
 server:
-  port: 8080
+  port: ${APP_PORT:8080}
 spring:
   application:
-    name: "auth-crediya"
+    name: ${APP_NAME:AuthService}
   devtools:
     add-properties: false
   profiles:
@@ -21,15 +21,14 @@ management:
 cors:
   allowed-origins: "*"
 
-# PostgreSQL Configuration
 adapters:
   r2dbc:
-    host: localhost
-    port: 5432
-    database: autenticacion_db
-    schema: public
-    username: postgres
-    password: password123
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5432}
+    database: ${DB_NAME:autenticacion_db}
+    schema: "public"
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:password123}
 
 # OpenAPI/Swagger Configuration
 springdoc:
@@ -42,8 +41,8 @@ springdoc:
 
 # JWT Configuration
 jwt:
-  issuer: "auth-crediya"
-  expiry: 360000  # 1 hour
+  issuer: ${JWT_ISSUER:AuthService}
+  expiry: ${JWT_EXPIRY:3600000}
   algorithm: "RS256"
-  private-key-path: "classpath:keys/private.pem"
-  public-key-path: "classpath:keys/public.pem"
+  private-key-path: ${JWT_PRIVATE_KEY_PATH:classpath:keys/private.pem}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public.pem}

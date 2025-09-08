@@ -12,7 +12,7 @@ buildCache {
     }
 }
 
-rootProject.name = 'ScaffoldQuickStart'
+rootProject.name = 'AuthService'
 
 include ':app-service'
 include ':model'
